@@ -1,0 +1,30 @@
+# Python
+**/__pycache__
+**/.pytest_cache
+*.zip
+*.gz
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.DS_Store
+
+bin/
+include/
+lib/
+pyvenv.cfg
+share/
+spark_db/
+databases/
+
+# IDE
+.vscode
+.idea
+
+# Playwright
+storage-state.json
