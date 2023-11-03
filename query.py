@@ -19,8 +19,7 @@ qa = None
 
 # system_message = SystemMessage(
 #     content="""
-#     This conversation is about a codebase, this codebase is PHP and includes laravel mixed with 
-#     drupal 6. Please constrain all answers to be about this codebase.
+#     This conversation is about a codebase, this codebase is written in PHP and includes frameworks x,y,z. Please constrain all answers to be about this codebase.
 #     """
 # )
 
@@ -51,8 +50,7 @@ with console.status('Starting...') as status:
 
 # qa(
 #     """
-#     This conversation is about a codebase, this codebase is PHP and includes laravel mixed with 
-#     drupal 6. Please constrain all answers to be about this codebase.
+#     This conversation is about a codebase, this codebase is written in PHP and includes frameworks x,y,z. Please constrain all answers to be about this codebase.
 #     """
 # )
 
