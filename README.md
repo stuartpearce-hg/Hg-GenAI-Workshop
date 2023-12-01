@@ -2,7 +2,8 @@
 This tooling aims to enhance the quality and accuracy of responses Gen AI LLMs provide when asked to support software engineers refactoring enterprise codebases.
 Expanding the context made available to the LLM through use of retrieval augmented generation to select code most relevant to an engineer's prompt.
 
-These tools utilise **LangChain (https://python.langchain.com/docs/get_started/introduction)** source code can be indexed for use with a range of LLMs
+These tools utilise **LangChain (https://python.langchain.com/docs/get_started/introduction)** source code can be indexed for use with a range of LLMs.
+You are encouraged to adapt and enhance tools for specific use cases and where possible contribute back enhancements to the community. Please refer to LICENSE file for details of the MIT license in use
 
 ## Usage
 **Set configuration values**
