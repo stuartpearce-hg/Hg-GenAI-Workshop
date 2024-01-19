@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from langchain.document_loaders.blob_loaders.schema import Blob, BlobLoader
-from langchain.document_loaders.helpers import detect_file_encodings
+from langchain_community.document_loaders.blob_loaders.schema import Blob, BlobLoader
+from langchain_community.document_loaders.helpers import detect_file_encodings
 
 class FileSystemModel():
     def __init__(

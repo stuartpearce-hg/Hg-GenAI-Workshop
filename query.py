@@ -1,4 +1,4 @@
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 from langchain.schema.messages import SystemMessage
 
 from workshop.integration import get_embeddings, get_qa

@@ -1,11 +1,11 @@
 import itertools
 
 from langchain.text_splitter import Language, RecursiveCharacterTextSplitter
-from langchain.document_loaders.generic import GenericLoader
-from langchain.document_loaders.parsers.txt import TextParser
-from langchain.vectorstores import FAISS
+from langchain_community.document_loaders.generic import GenericLoader
+from langchain_community.document_loaders.parsers.txt import TextParser
+from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import Language
-from langchain.document_loaders.parsers.language.language_parser import LANGUAGE_EXTENSIONS, LANGUAGE_SEGMENTERS, LanguageParser
+from langchain_community.document_loaders.parsers.language.language_parser import LANGUAGE_EXTENSIONS, LANGUAGE_SEGMENTERS, LanguageParser
 
 from pathlib import Path
 
@@ -34,7 +34,7 @@ models = [
     FileSystemModel(
         get_repo_path(), 
         includes=['./**/*'], 
-        suffixes=['.cs', '.csproj', '.sln'],
+        suffixes=['.csv'],
     ),
     # src
     # FileSystemModel(
