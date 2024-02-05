@@ -1,18 +1,21 @@
-from langchain.chat_models import AzureChatOpenAI
+from langchain_community.chat_models import AzureChatOpenAI
 from langchain.chains import ConversationalRetrievalChain
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_openai import AzureOpenAIEmbeddings
 from langchain.memory import ConversationSummaryMemory
 
-from .config import openai_deployment, openai_deployment_embeddings, get_openai_config, get_query_temperature
+from .config import openai_deployment, openai_deployment_embeddings, get_openai_config, get_query_temperature, get_azure_endpoint, get_api_key, get_api_type, get_api_version
 
 def get_embeddings(disallowed_special=(), chunk_size=16):
     cfg = get_openai_config()
     
-    return OpenAIEmbeddings(
+    return AzureOpenAIEmbeddings(
+        azure_endpoint=get_azure_endpoint(),
         disallowed_special=disallowed_special, 
         chunk_size=chunk_size, 
-        deployment=openai_deployment_embeddings,
-        **cfg
+        azure_deployment=openai_deployment_embeddings,
+        api_key=get_api_key(),
+        openai_api_type=get_api_type(),
+        api_version=get_api_version()
     )
 
 def get_qa(retriever, verbose=True):
