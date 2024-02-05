@@ -34,7 +34,7 @@ models = [
     FileSystemModel(
         get_repo_path(), 
         includes=['./**/*'], 
-        suffixes=['.csv'],
+        suffixes=['.php', '.html', '.js', '.cs', '.csproj', '.sln', '.xml', '.json', '.md', '.yml', '.yaml', '.sh', '.py', '.css'],
     ),
     # src
     # FileSystemModel(

@@ -65,6 +65,6 @@ while True:
         continue
 
     with console.status('Querying') as q:
-        result = qa(question)
+        result = qa.invoke(question)
 
     print(Panel(Markdown(result['answer']), title=result['question'], padding=1))
