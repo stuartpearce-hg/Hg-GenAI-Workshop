@@ -1,4 +1,4 @@
-from langchain_community.chat_models import AzureChatOpenAI
+from langchain_openai import AzureChatOpenAI
 from langchain.chains import ConversationalRetrievalChain
 from langchain_openai import AzureOpenAIEmbeddings
 from langchain.memory import ConversationSummaryMemory
