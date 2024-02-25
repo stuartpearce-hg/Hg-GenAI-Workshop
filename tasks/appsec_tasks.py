@@ -8,10 +8,17 @@ class AppSecTasks():
       """),
       agent=agent
     )
-    
+
+  def get_ticket_to_fix(self, agent):
+    return Task(description=dedent(f"""
+        Search project AC for issues of type Bug in ToDo status. Assign the ticket to yourself and set to In Progress.
+      """),
+      agent=agent
+    )
+
   def raise_tickets(self, agent): 
     return Task(description=dedent(f"""
-        Identify the mandatory fields required for tickets of type Bug then Create new Jira Bug issues in project AC for each vulnerability.
+        Create new Jira Bug issues in project AC for each vulnerability.
       """),
       agent=agent
     )

@@ -1,12 +1,9 @@
 from crewai import Agent
-import os
-from dotenv import load_dotenv
 from langchain_community.agent_toolkits.jira.toolkit import JiraToolkit
-from langchain_community.utilities.jira import JiraAPIWrapper
 from langchain_community.agent_toolkits.github.toolkit import GitHubToolkit
-from langchain_community.utilities.github import GitHubAPIWrapper
 
 from langchain_openai import AzureChatOpenAI
+from workshop.integration import get_llm, get_jira_toolkit, get_github_toolkit
 
 class AppSecAgents():
 
@@ -15,27 +12,9 @@ class AppSecAgents():
     github_toolkit = GitHubToolkit
 
     def __init__(self) -> None:
-        load_dotenv()
-        self.def_llm = AzureChatOpenAI(
-            openai_api_version=os.environ.get("AZURE_OPENAI_VERSION", "2023-07-01-preview"),
-            azure_deployment=os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt35"),
-            azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT", "https://<your-endpoint>.openai.azure.com/"),
-            api_key=os.environ.get("AZURE_OPENAI_KEY"),
-            temperature=0.3
-        )
-        os.environ["JIRA_USERNAME"] = os.environ.get("JIRA_EMAIL")
-        os.environ["JIRA_INSTANCE_URL"] = os.environ.get("JIRA_SERVER")
-        os.environ["JIRA_API_TOKEN"] = os.environ.get("JIRA_API_KEY")
-        os.environ["GITHUB_APP_ID"] = os.environ.get("GITHUB_APP_ID")
-        os.environ["GITHUB_APP_PRIVATE_KEY"] = os.environ.get("GITHUB_APP_PRIVATE_KEY")
-        os.environ["GITHUB_REPOSITORY"] = os.environ.get("GITHUB_REPOSITORY")
-        os.environ["GITHUB_BRANCH"] = os.environ.get("GITHUB_BRANCH")
-        os.environ["GITHUB_BASE_BRANCH"] = os.environ.get("GITHUB_BASE_BRANCH")
-        
-        jira = JiraAPIWrapper()
-        self.jira_toolkit = JiraToolkit.from_jira_api_wrapper(jira)
-        github = GitHubAPIWrapper()
-        self.github_toolkit = GitHubToolkit.from_github_api_wrapper(github)
+        self.def_llm = get_llm()
+        self.jira_toolkit = get_jira_toolkit()
+        self.github_toolkit = get_github_toolkit()
 
 
   
