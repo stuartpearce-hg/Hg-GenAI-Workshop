@@ -11,7 +11,7 @@ class AppSecTasks():
 
   def get_ticket_to_fix(self, agent):
     return Task(description=dedent(f"""
-        Search project AC for issues of type Bug in ToDo status. Assign the ticket to yourself and set to In Progress.
+        Search project AC for issues of type Bug that are assigned to you.
       """),
       agent=agent
     )
@@ -25,7 +25,8 @@ class AppSecTasks():
 
   def fix_issues(self, agent):
       return Task(description=dedent(f"""
-          Create a branch from the base branch. Develop the fixes required to resolve the issue. Once the fixes are developed, create a pull request to merge the branch into the base branch.
+          Develop the fixes required to resolve the issue on a new branch for this ticket. 
+          Once the code has been comitted and pushed to the repository, create a pull request to merge the branch into the base branch.
         """),
         agent=agent
     ) 

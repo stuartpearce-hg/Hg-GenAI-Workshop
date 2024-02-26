@@ -19,6 +19,8 @@ class AppSecAgents():
 
   
     def senior_engineer(self):
+        combined_tools = self.jira_toolkit.get_tools()
+        combined_tools.extend(self.github_toolkit.get_tools() )
         return Agent(
             role='Experienced software engineer',
             goal="""Implement the most maintainable and scalable software adhering to industry best practices and design patterns""",
@@ -26,7 +28,7 @@ class AppSecAgents():
             deep expertise developing modern SaaS platforms.""",
             verbose=True,
             llm=self.def_llm,
-            tools=self.jira_toolkit.get_tools()
+            tools=combined_tools
         )
 
     def quality_assurance(self):
@@ -40,11 +42,13 @@ class AppSecAgents():
         )
 
     def architect(self):
+        combined_tools = self.jira_toolkit.get_tools()
+        combined_tools.extend(self.github_toolkit.get_tools() )
         return Agent(
             role='SaaS Architect',
             goal="""Ensure the software is designed to be scalable, maintainable, secure and cost effective to operate in a public cloud environment""",
             backstory="""You're the most experienced architect with deep expertise designing modern SaaS platforms.""",
             verbose=True,
             llm=self.def_llm,
-            tools=self.github_toolkit.get_tools()
+            tools=combined_tools
         )
