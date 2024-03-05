@@ -17,6 +17,16 @@ openai_deployment_embeddings = os.getenv('OPENAI_API_EMBEDDINGS_NAME')
 repository_path = os.getenv('REPOSITORY_DIRECTORY')
 temperature = os.getenv('QUERY_TEMPERATURE', 0.7)
 
+jira_username = os.getenv('JIRA_EMAIL')
+jira_instance_url = os.getenv('JIRA_SERVER')
+jira_api_token = os.getenv('JIRA_API_KEY')
+
+github_app_id = os.getenv('GITHUB_APP_ID')
+github_app_private_key = os.getenv('GITHUB_APP_PRIVATE_KEY')
+github_repository = os.getenv('GITHUB_REPOSITORY')
+github_branch = os.getenv('GITHUB_BRANCH')
+github_base_branch = os.getenv('GITHUB_BASE_BRANCH')
+
 
 def get_openai_config():
     return {
@@ -45,6 +55,21 @@ def get_repo_path():
 def get_query_temperature():
     return temperature
 
-
 def get_db_path():
     return database_path
+
+def get_jira_config():
+    return {
+        'jira_username': jira_username,
+        'jira_instance_url': jira_instance_url,
+        'jira_api_token': jira_api_token
+    }
+
+def get_github_config():
+    return {
+        'github_app_id': github_app_id,
+        'github_app_private_key': github_app_private_key,
+        'github_repository': github_repository,
+        'github_base_branch': github_base_branch
+   }
+
