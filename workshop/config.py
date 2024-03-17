@@ -15,7 +15,9 @@ openai_deployment = os.getenv('OPENAI_API_DEPLOYMENT_NAME')
 openai_deployment_embeddings = os.getenv('OPENAI_API_EMBEDDINGS_NAME')
 
 repository_path = os.getenv('REPOSITORY_DIRECTORY')
+output_path = os.getenv('CODEGEN_OUTPUT_PATH')
 temperature = os.getenv('QUERY_TEMPERATURE', 0.7)
+similarity_threshold = os.getenv('SIMILARITY_THRESHOLD', 0.7)
 
 jira_username = os.getenv('JIRA_EMAIL')
 jira_instance_url = os.getenv('JIRA_SERVER')
@@ -51,9 +53,15 @@ def get_api_version():
 def get_repo_path():
     return repository_path
 
+def get_output_path():
+    return output_path
+
 
 def get_query_temperature():
     return temperature
+
+def get_similarity_threshold():
+    return similarity_threshold
 
 def get_db_path():
     return database_path
@@ -72,4 +80,7 @@ def get_github_config():
         'github_repository': github_repository,
         'github_base_branch': github_base_branch
    }
+
+def get_github_repo():
+    return github_repository
 
