@@ -17,6 +17,7 @@ click
 crewai
 coloredlogs
 dataclasses-json
+dotenv
 emoji
 esprima
 exceptiongroup
