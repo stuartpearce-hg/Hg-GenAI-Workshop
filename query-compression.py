@@ -4,13 +4,14 @@ from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import EmbeddingsFilter
 
 from workshop.integration import get_embeddings, get_qa
-from workshop.config import get_repo_path, get_db_path, get_similarity_threshold
+from workshop.config import get_repo_path, get_db_path, get_similarity_threshold, get_output_path
 
 from rich import print
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.prompt import Prompt
+from pathlib import Path
 
 console = Console()
 
@@ -60,17 +61,20 @@ with console.status('Starting...') as status:
 #     """
 # )
 
-while True:
-    question = Prompt.ask("Question")
+file = Path(get_output_path(), "QnALog.txt")
+with open(file, 'w') as csp:
+    while True:
+        question = Prompt.ask("Question")
+        csp.write('Question:' + question + '\n')
 
-    if question == "quit":
-        break
-    if question == "undo":
-        memory.chat_memory.messages.pop()
-        memory.chat_memory.messages.pop()
-        continue
+        if question == "quit":
+            break
+        if question == "undo":
+            memory.chat_memory.messages.pop()
+            memory.chat_memory.messages.pop()
+            continue
 
-    with console.status('Querying') as q:
-        result = qa.invoke(question)
-
-    print(Panel(Markdown(result['answer']), title=result['question'], padding=1))
+        with console.status('Querying') as q:
+            result = qa.invoke(question)
+            print(Panel(Markdown(result['answer']), title=result['question'], padding=1))
+            csp.write('Answer:' + result['answer'] + '\n')
