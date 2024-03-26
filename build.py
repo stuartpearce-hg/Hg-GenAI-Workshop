@@ -34,7 +34,7 @@ models = [
     FileSystemModel(
         get_repo_path(), 
         includes=['./**/*'], 
-        suffixes=['.php', '.html', '.js', '.cs', '.csproj', '.sln', '.xml', '.json', '.md', '.yml', '.yaml', '.sh', '.py', '.css'],
+        suffixes=['.php', '.html', '.js', '.cs', '.csproj', '.sln', '.xml', '.json', '.md', '.yml', '.yaml', '.sh', '.py', '.css', '.sql', '.vbp', '.frm', '.bas', '.cls'],
     ),
     # src
     # FileSystemModel(
@@ -80,7 +80,7 @@ try:
 
         task_text = p.add_task('Splitting Texts')
         python_splitter = CSharpTextSplitter(
-            chunk_size=4000, 
+            chunk_size=2000, 
             chunk_overlap=200
         )
         texts = python_splitter.split_documents(p.track(documents, task_id=task_text))

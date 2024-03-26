@@ -18,7 +18,7 @@ REPOSITORY_DIRECTORY = Path to source code for analysis
 
 **Dependency setup**  
 With pip:
-pip install openai tiktoken langchain esprima faiss-cpu unstructured
+pip install openai -r requirements.txt
 
 **Build vecotr database of code**  
 Edit line 37 of build.py to refernce file extensions relevant to the codebase e.g. for C# set suffixes=['.cs', '.csproj', '.sln']
@@ -32,3 +32,9 @@ prompt "quit" when finished
 
 Large codebases can suffer degraded performance when too much or too little context is made available to the LLM alongside prompt inputs.
 Adjusting the code retrieval parameters on line 41  **search_kwargs={"k": 20, "fetch_k": 50}** can improve LLM performance by ensuring sufficient context is provided but not too much to include unrelated code.
+
+**Agent tooling is under development**
+This tooling Uses CrewAI to orchestrate agent based resolution of tasks within a defined process
+Agents can utilise tools which require external setup for Github and Jira
+
+See https://python.langchain.com/docs/integrations/toolkits/github and https://python.langchain.com/docs/integrations/toolkits/jira for setup instructions
