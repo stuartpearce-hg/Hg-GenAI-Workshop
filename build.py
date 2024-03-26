@@ -80,7 +80,7 @@ try:
 
         task_text = p.add_task('Splitting Texts')
         python_splitter = CSharpTextSplitter(
-            chunk_size=6000, 
+            chunk_size=2000, 
             chunk_overlap=200
         )
         texts = python_splitter.split_documents(p.track(documents, task_id=task_text))

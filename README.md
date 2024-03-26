@@ -18,7 +18,7 @@ REPOSITORY_DIRECTORY = Path to source code for analysis
 
 **Dependency setup**  
 With pip:
-pip install openai tiktoken langchain esprima faiss-cpu unstructured
+pip install openai -r requirements.txt
 
 **Build vecotr database of code**  
 Edit line 37 of build.py to refernce file extensions relevant to the codebase e.g. for C# set suffixes=['.cs', '.csproj', '.sln']

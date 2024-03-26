@@ -38,7 +38,7 @@ with console.status('Starting...') as status:
         status.update('Loading [cyan]Chat Bot...')
         retriever = db.as_retriever(
             search_type="mmr", # Also test "similarity"
-            search_kwargs={"k": 20, "fetch_k": 50},
+            search_kwargs={"k": 20, "fetch_k": 30},
         )
         [qa, memory] = get_qa(retriever=retriever)
         console.log('Loading [cyan]Chat Bot -> [green]DONE')
@@ -53,7 +53,7 @@ with console.status('Starting...') as status:
 #     This conversation is about a codebase, this codebase is written in PHP and includes frameworks x,y,z. Please constrain all answers to be about this codebase.
 #     """
 # )
-
+    
 while True:
     question = Prompt.ask("Question")
 
@@ -68,3 +68,5 @@ while True:
         result = qa.invoke(question)
 
     print(Panel(Markdown(result['answer']), title=result['question'], padding=1))
+
+    
