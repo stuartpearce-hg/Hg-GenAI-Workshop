@@ -41,6 +41,7 @@ jsonpointer
 langchain
 langchain_community
 langchain_openai
+langchain-together
 langdetect
 langsmith
 lxml
