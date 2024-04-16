@@ -6,6 +6,8 @@ dotenv.load_dotenv()
 
 database_path = os.getenv('DATABASE_PATH', './databases/current')
 
+provider = os.getenv('PROVIDER')
+
 azure_endpoint = os.getenv('AZURE_ENDPOINT')
 openai_api_key = os.getenv('OPENAI_API_KEY')
 openai_api_type = os.getenv('OPENAI_API_TYPE')
@@ -36,6 +38,8 @@ github_repository = os.getenv('GITHUB_REPOSITORY')
 github_branch = os.getenv('GITHUB_BRANCH')
 github_base_branch = os.getenv('GITHUB_BASE_BRANCH')
 
+def get_provider():
+    return provider
 
 def get_openai_config():
     return {

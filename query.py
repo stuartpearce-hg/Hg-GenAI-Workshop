@@ -1,14 +1,15 @@
 from langchain_community.vectorstores import FAISS
 from langchain.schema.messages import SystemMessage
 
-from workshop.integration_anthropic import get_embeddings, get_qa
-from workshop.config import get_repo_path, get_db_path
+from workshop.integration import get_embeddings, get_qa
+from workshop.config import get_repo_path, get_db_path, get_output_path
 
 from rich import print
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.prompt import Prompt
+from pathlib import Path
 
 console = Console()
 
@@ -53,20 +54,21 @@ with console.status('Starting...') as status:
 #     This conversation is about a codebase, this codebase is written in PHP and includes frameworks x,y,z. Please constrain all answers to be about this codebase.
 #     """
 # )
-    
-while True:
-    question = Prompt.ask("Question")
+   
+file = Path(get_output_path(), "QnALog.txt")
+with open(file, 'w') as csp:
+    while True:
+        question = Prompt.ask("Question")
+        csp.write('Question:' + question + '\n')
 
-    if question == "quit":
-        break
-    if question == "undo":
-        memory.chat_memory.messages.pop()
-        memory.chat_memory.messages.pop()
-        continue
+        if question == "quit":
+            break
+        if question == "undo":
+            memory.chat_memory.messages.pop()
+            memory.chat_memory.messages.pop()
+            continue
 
-    with console.status('Querying') as q:
-        result = qa.invoke(question)
-
-    print(Panel(Markdown(result['answer']), title=result['question'], padding=1))
-
-    
+        with console.status('Querying') as q:
+            result = qa.invoke(question)
+            print(Panel(Markdown(result['answer']), title=result['question'], padding=1))
+            csp.write('Answer:' + result['answer'] + '\n')

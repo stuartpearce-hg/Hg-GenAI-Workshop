@@ -15,7 +15,7 @@ from rich.progress import Progress, SpinnerColumn, BarColumn, TimeElapsedColumn,
 from rich.prompt import Confirm
 from rich.table import Table
 
-from workshop.integration_anthropic import get_embeddings
+from workshop.integration import get_embeddings
 from workshop.loaders import TextBlobLoader, FileSystemModel, TextBlobListLoader
 from workshop.config import get_repo_path, get_db_path
 from workshop.splitters import PHPTextSplitter, CSharpTextSplitter

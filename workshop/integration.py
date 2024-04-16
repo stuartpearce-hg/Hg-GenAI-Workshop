@@ -1,6 +1,9 @@
+from langchain_together import Together
+from langchain_anthropic import ChatAnthropic
 from langchain_openai import AzureChatOpenAI
 from langchain.chains import ConversationalRetrievalChain
 from langchain_openai import AzureOpenAIEmbeddings
+from langchain_together.embeddings import TogetherEmbeddings
 from langchain.memory import ConversationSummaryMemory
 from langchain_community.agent_toolkits.jira.toolkit import JiraToolkit
 from langchain_community.utilities.jira import JiraAPIWrapper
@@ -10,30 +13,41 @@ from langchain_community.document_transformers import LongContextReorder
 from langchain.retrievers.document_compressors import DocumentCompressorPipeline
 from langchain.retrievers import ContextualCompressionRetriever
 
-from .config import openai_deployment, openai_deployment_embeddings, get_openai_config, get_query_temperature, get_azure_endpoint, get_api_key, get_api_type, get_api_version, get_jira_config, get_github_config
+from .config import get_provider, openai_deployment, openai_deployment_embeddings, get_anthropic_api_key, get_anthropic_chat_model, get_together_embeddings, get_together_api_key, get_together_chat_model, get_openai_config, get_query_temperature, get_azure_endpoint, get_api_key, get_api_type, get_api_version, get_jira_config, get_github_config
 
 def get_embeddings(disallowed_special=(), chunk_size=16):
-    cfg = get_openai_config()
+    provider = get_provider()
     
-    return AzureOpenAIEmbeddings(
-        azure_endpoint=get_azure_endpoint(),
-        disallowed_special=disallowed_special, 
-        chunk_size=chunk_size, 
-        azure_deployment=openai_deployment_embeddings,
-        api_key=get_api_key(),
-        openai_api_type=get_api_type(),
-        api_version=get_api_version()
-    )
+    if(provider == 'azure'):
+        cfg = get_openai_config()
+    
+        return AzureOpenAIEmbeddings(
+            azure_endpoint=get_azure_endpoint(),
+            disallowed_special=disallowed_special, 
+            chunk_size=chunk_size, 
+            azure_deployment=openai_deployment_embeddings,
+            api_key=get_api_key(),
+            openai_api_type=get_api_type(),
+            api_version=get_api_version()
+        )
+    elif(provider == 'anthropic'):
+        cfg = get_openai_config()
+    
+        return AzureOpenAIEmbeddings(
+            azure_endpoint=get_azure_endpoint(),
+            disallowed_special=disallowed_special, 
+            chunk_size=chunk_size, 
+            azure_deployment=openai_deployment_embeddings,
+            api_key=get_api_key(),
+            openai_api_type=get_api_type(),
+            api_version=get_api_version()
+        )
+    elif(provider == 'together'):
+        return TogetherEmbeddings(together_api_key=get_together_api_key(), model=get_together_embeddings())
+    
 
 def get_qa(retriever, verbose=True):
-    cfg = get_openai_config()
-
-    llm = AzureChatOpenAI(
-        deployment_name=openai_deployment,
-        temperature=get_query_temperature(),
-        verbose=verbose,
-        **cfg
-    )
+    llm = get_llm()
 
     memory = ConversationSummaryMemory(
         llm=llm,
@@ -51,24 +65,41 @@ def get_qa(retriever, verbose=True):
 
     compression_retriever = ContextualCompressionRetriever(base_compressor=pipeline_compressor, base_retriever=retriever)
 
-    #qa = ConversationalRetrievalChain.from_llm(llm=llm, retriever=compression_retriever, memory=memory, return_source_documents=True)
-
     return [ConversationalRetrievalChain.from_llm(
         llm, 
         retriever=compression_retriever, 
         memory=memory
     ), memory]
+    
 
 def get_llm():
-    cfg = get_openai_config()
+    provider = get_provider()
+    if(provider == 'azure'):
+        cfg = get_openai_config()
 
-    return AzureChatOpenAI(
-        deployment_name=openai_deployment,
-        temperature=get_query_temperature(),
-        verbose=True,
-        **cfg
-   )
-
+        return AzureChatOpenAI(
+            deployment_name=openai_deployment,
+            temperature=get_query_temperature(),
+            verbose=True,
+            **cfg
+    )
+    elif(provider == 'anthropic'):
+        return ChatAnthropic(
+            model_name=get_anthropic_chat_model(),
+            temperature=get_query_temperature(),
+            top_k=1,
+            api_key=get_anthropic_api_key()
+        )
+    elif(provider == 'together'):
+        return Together(
+            model=get_together_chat_model(),
+            temperature=get_query_temperature(),
+            repetition_penalty=1.0,
+            top_k=1,
+            max_tokens=2048,
+            together_api_key=get_together_api_key()
+        )
+    
 def get_jira_toolkit():
     cfg = get_jira_config()
     jira = JiraAPIWrapper(**cfg)
