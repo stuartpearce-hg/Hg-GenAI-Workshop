@@ -6,6 +6,8 @@ dotenv.load_dotenv()
 
 database_path = os.getenv('DATABASE_PATH', './databases/current')
 
+provider = os.getenv('PROVIDER')
+
 azure_endpoint = os.getenv('AZURE_ENDPOINT')
 openai_api_key = os.getenv('OPENAI_API_KEY')
 openai_api_type = os.getenv('OPENAI_API_TYPE')
@@ -13,6 +15,13 @@ openai_api_version = os.getenv('OPENAI_API_VERSION')
 
 openai_deployment = os.getenv('OPENAI_API_DEPLOYMENT_NAME')
 openai_deployment_embeddings = os.getenv('OPENAI_API_EMBEDDINGS_NAME')
+
+together_api_key = os.getenv('TOGETHER_API_KEY')
+together_deployment_embeddings = os.getenv('TOGETHER_EMBEDDINGS_MODEL')
+together_chat_model = os.getenv('TOGETHER_CHAT_MODEL')
+
+anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
+anthropic_chat_model = os.getenv('ANTHROPIC_CHAT_MODEL')
 
 repository_path = os.getenv('REPOSITORY_DIRECTORY')
 output_path = os.getenv('CODEGEN_OUTPUT_PATH')
@@ -29,6 +38,8 @@ github_repository = os.getenv('GITHUB_REPOSITORY')
 github_branch = os.getenv('GITHUB_BRANCH')
 github_base_branch = os.getenv('GITHUB_BASE_BRANCH')
 
+def get_provider():
+    return provider
 
 def get_openai_config():
     return {
@@ -46,6 +57,21 @@ def get_api_key():
 
 def get_api_type():
     return openai_api_type
+
+def get_together_api_key():
+    return together_api_key
+
+def get_together_embeddings():
+    return together_deployment_embeddings
+
+def get_together_chat_model():
+    return together_chat_model
+
+def get_anthropic_api_key():
+    return anthropic_api_key
+
+def get_anthropic_chat_model():
+    return anthropic_chat_model
 
 def get_api_version():
     return openai_api_version
