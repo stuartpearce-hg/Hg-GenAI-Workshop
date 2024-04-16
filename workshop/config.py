@@ -18,6 +18,9 @@ together_api_key = os.getenv('TOGETHER_API_KEY')
 together_deployment_embeddings = os.getenv('TOGETHER_EMBEDDINGS_MODEL')
 together_chat_model = os.getenv('TOGETHER_CHAT_MODEL')
 
+anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
+anthropic_chat_model = os.getenv('ANTHROPIC_CHAT_MODEL')
+
 repository_path = os.getenv('REPOSITORY_DIRECTORY')
 output_path = os.getenv('CODEGEN_OUTPUT_PATH')
 temperature = os.getenv('QUERY_TEMPERATURE', 0.7)
@@ -59,6 +62,12 @@ def get_together_embeddings():
 
 def get_together_chat_model():
     return together_chat_model
+
+def get_anthropic_api_key():
+    return anthropic_api_key
+
+def get_anthropic_chat_model():
+    return anthropic_chat_model
 
 def get_api_version():
     return openai_api_version

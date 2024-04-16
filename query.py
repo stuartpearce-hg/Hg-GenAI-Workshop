@@ -1,7 +1,7 @@
 from langchain_community.vectorstores import FAISS
 from langchain.schema.messages import SystemMessage
 
-from workshop.integration_together import get_embeddings, get_qa
+from workshop.integration_anthropic import get_embeddings, get_qa
 from workshop.config import get_repo_path, get_db_path
 
 from rich import print

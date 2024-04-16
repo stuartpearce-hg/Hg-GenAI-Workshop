@@ -3,7 +3,7 @@ from langchain_community.agent_toolkits.jira.toolkit import JiraToolkit
 from langchain_community.agent_toolkits.github.toolkit import GitHubToolkit
 
 from langchain_openai import AzureChatOpenAI
-from workshop.integration import get_llm, get_jira_toolkit, get_github_toolkit
+from workshop.integration_anthropic import get_llm, get_jira_toolkit, get_github_toolkit
 
 class AppSecAgents():
 
@@ -51,4 +51,34 @@ class AppSecAgents():
             verbose=True,
             llm=self.def_llm,
             tools=combined_tools
+        )
+    
+    def ticket_manager(self):
+        return Agent(
+            role='Ticket Manager',
+            goal="""Ensure the status of work is accurately tracked within Jira tickets""",
+            backstory="""You help the team collaborate by tracking the latest status of work as it progresses. Updating tickets to ensure everyone is aware of progress""",
+            verbose=True,
+            llm=self.def_llm,
+            tools=self.jira_toolkit.get_tools()
+        )
+    
+    def code_manager(self):
+        return Agent(
+            role='Code Manager',
+            goal="""Ensure source code is managed and tracked within GitHub repository supporting the development process""",
+            backstory="""You keep track of changes to the source code and ensure branches of work are controlled via pull requests for review""",
+            verbose=True,
+            llm=self.def_llm,
+            tools=self.github_toolkit.get_tools()
+        )
+    
+    def appsec_engineer(self):
+        return Agent(
+            role='Experienced software engineer',
+            goal="""Implement the most maintainable and scalable software adhering to industry best practices and design patterns""",
+            backstory="""The most seasoned senior software engineer with 
+            deep expertise developing modern SaaS platforms.""",
+            verbose=True,
+            llm=self.def_llm
         )

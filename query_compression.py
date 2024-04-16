@@ -3,7 +3,7 @@ from langchain.schema.messages import SystemMessage
 from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import EmbeddingsFilter
 
-from workshop.integration_together import get_embeddings, get_qa
+from workshop.integration_anthropic import get_embeddings, get_qa
 from workshop.config import get_repo_path, get_db_path, get_similarity_threshold, get_output_path
 
 from rich import print
