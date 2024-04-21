@@ -38,7 +38,7 @@ with console.status('Starting...') as status:
     try:
         status.update('Loading [cyan]Chat Bot...')
         retriever = db.as_retriever(
-            search_type="mmr", # Also test "similarity"
+            search_type="mmr", 
             search_kwargs={"k": 20, "fetch_k": 30},
         )
         [qa, memory] = get_qa(retriever=retriever)

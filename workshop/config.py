@@ -23,6 +23,9 @@ together_chat_model = os.getenv('TOGETHER_CHAT_MODEL')
 anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
 anthropic_chat_model = os.getenv('ANTHROPIC_CHAT_MODEL')
 
+groq_api_key = os.getenv('GROQ_API_KEY')
+groq_chat_model = os.getenv('GROQ_CHAT_MODEL')
+
 repository_path = os.getenv('REPOSITORY_DIRECTORY')
 output_path = os.getenv('CODEGEN_OUTPUT_PATH')
 temperature = os.getenv('QUERY_TEMPERATURE', 0.7)
@@ -72,6 +75,12 @@ def get_anthropic_api_key():
 
 def get_anthropic_chat_model():
     return anthropic_chat_model
+
+def get_groq_api_key():
+    return groq_api_key
+
+def get_groq_chat_model():
+    return groq_chat_model
 
 def get_api_version():
     return openai_api_version
