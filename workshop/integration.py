@@ -96,7 +96,6 @@ def get_llm():
             temperature=get_query_temperature(),
             repetition_penalty=1.0,
             top_k=1,
-            max_tokens=2048,
             together_api_key=get_together_api_key()
         )
     

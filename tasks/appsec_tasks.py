@@ -1,6 +1,6 @@
 from crewai import Task
 from textwrap import dedent
-from workshop.integration_anthropic import get_llm, get_jira_toolkit, get_github_toolkit
+from workshop.integration import get_llm, get_jira_toolkit, get_github_toolkit
 from tools.rag_tool import GetCode
 from crewai_tools import GithubSearchTool
 from workshop.config import get_repo_path, get_github_repo, get_github_config

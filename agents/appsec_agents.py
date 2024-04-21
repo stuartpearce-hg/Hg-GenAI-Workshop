@@ -3,7 +3,7 @@ from langchain_community.agent_toolkits.jira.toolkit import JiraToolkit
 from langchain_community.agent_toolkits.github.toolkit import GitHubToolkit
 
 from langchain_openai import AzureChatOpenAI
-from workshop.integration_anthropic import get_llm, get_jira_toolkit, get_github_toolkit
+from workshop.integration import get_llm, get_jira_toolkit, get_github_toolkit
 
 class AppSecAgents():
 
