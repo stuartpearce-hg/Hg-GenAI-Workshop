@@ -11,8 +11,6 @@ beautifulsoup4
 certifi
 chardet
 charset-normalizer
-chroma-hnswlib
-chromadb
 click
 crewai
 coloredlogs

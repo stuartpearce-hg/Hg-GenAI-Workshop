@@ -54,7 +54,9 @@ with console.status('Starting...') as status:
 #     This conversation is about a codebase, this codebase is written in PHP and includes frameworks x,y,z. Please constrain all answers to be about this codebase.
 #     """
 # )
-   
+
+# Make sure the output path exists
+Path(get_output_path()).mkdir(parents=True, exist_ok=True)   
 file = Path(get_output_path(), "QnALog.txt")
 with open(file, 'w') as csp:
     while True:
