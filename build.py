@@ -20,6 +20,7 @@ from workshop.loaders import TextBlobLoader, FileSystemModel, TextBlobListLoader
 from workshop.config import get_repo_path, get_db_path
 from workshop.splitters import PHPTextSplitter, CSharpTextSplitter
 from workshop.parsers import PHPSegmenter
+from langchain.document_loaders.helpers import detect_file_encodings
 
 console = Console()
 
@@ -34,7 +35,7 @@ models = [
     FileSystemModel(
         get_repo_path(), 
         includes=['./**/*'], 
-        suffixes=['.php', '.html', '.js', '.cs', '.csproj', '.sln', '.xml', '.json', '.md', '.yml', '.yaml', '.sh', '.py', '.css', '.sql', '.vbp', '.frm', '.bas', '.cls'],
+        suffixes=['.php', '.html', '.js', '.cs', '.csproj', '.sln', '.json', '.md', '.yml', '.yaml', '.sh', '.py', '.css', '.sql', '.vbp', '.frm', '.bas', '.cls', '.abap', '.asddls', '.asbdef'],
     ),
     # src
     # FileSystemModel(
@@ -71,7 +72,7 @@ try:
 
         task_load = p.add_task('Loading Documents', total=None)
 
-        blob_loader = TextBlobListLoader(p.track(merge_models(models), task_id=task_load))
+        blob_loader = TextBlobListLoader(paths=p.track(merge_models(models), task_id=task_load))
         loader = GenericLoader(blob_loader, TextParser())
         
         documents = loader.load()
