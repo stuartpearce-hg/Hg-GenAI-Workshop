@@ -368,9 +368,12 @@ class MartechAnalyzer:
         self._save_results()
     
     def _save_results(self):
+        output_dir = os.path.dirname(self.output_csv)
+        
         # Save detailed domain results
         domain_results = [r for r in self.results if 'cms' in r]
-        with open('martech_analysis/output/domain_results.csv', 'w', newline='') as f:
+        domain_results_path = os.path.join(output_dir, 'domain_results.csv')
+        with open(domain_results_path, 'w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=['brand', 'domain', 'cms', 'personalization', 'search'])
             writer.writeheader()
             writer.writerows(domain_results)
@@ -391,6 +394,8 @@ class MartechAnalyzer:
             self._generate_category_charts(df, category)
     
     def _generate_category_charts(self, df: pd.DataFrame, category: str):
+        output_dir = os.path.dirname(self.output_csv)
+        
         # Filter for brand totals and get technology distribution
         brand_df = df[df['domain'] == '*BRAND_TOTAL*']
         brand_df = brand_df[brand_df['technology_type'] == category.lower()]
@@ -406,7 +411,7 @@ class MartechAnalyzer:
         plt.ylabel('Weighted Brand Count')
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
-        plt.savefig(f'martech_analysis/output/{category}_brand_distribution.png', dpi=300, bbox_inches='tight')
+        plt.savefig(os.path.join(output_dir, f'{category}_brand_distribution.png'), dpi=300, bbox_inches='tight')
         plt.close()
         
         # Calculate domain-level distribution
@@ -435,7 +440,7 @@ class MartechAnalyzer:
         plt.ylabel('Number of Domains')
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
-        plt.savefig(f'martech_analysis/output/{category}_domain_distribution.png', dpi=300, bbox_inches='tight')
+        plt.savefig(os.path.join(output_dir, f'{category}_domain_distribution.png'), dpi=300, bbox_inches='tight')
         plt.close()
 
     def _analyze_link_tag(self, tag, technologies: Dict[str, Set[str]]):
@@ -507,20 +512,29 @@ class MartechAnalyzer:
 if __name__ == "__main__":
     import os
     
+    # Get project root directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(os.path.dirname(script_dir))
+    
+    # Set up paths
+    output_dir = os.path.join(project_root, 'martech_analysis', 'output')
+    data_dir = os.path.join(project_root, 'martech_analysis', 'data')
+    
     # Create output directory
-    os.makedirs('martech_analysis/output', exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
     
     # Create todo file if it doesn't exist
-    if not os.path.exists('/home/ubuntu/todo.txt'):
-        with open('martech_analysis/data/brands.txt', 'r') as f:
+    todo_path = os.path.join(data_dir, 'todo.txt')
+    if not os.path.exists(todo_path):
+        with open(os.path.join(data_dir, 'brands.txt'), 'r') as f:
             brands = [line.strip() for line in f if line.strip()]
-        with open('/home/ubuntu/todo.txt', 'w') as f:
+        with open(todo_path, 'w') as f:
             for brand in brands:
                 f.write(f'- [ ] {brand}\n')
     
     analyzer = MartechAnalyzer(
-        todo_file='/home/ubuntu/todo.txt',
-        output_csv='martech_analysis/output/martech_results.csv'
+        todo_file=todo_path,
+        output_csv=os.path.join(output_dir, 'martech_results.csv')
     )
     
     try:

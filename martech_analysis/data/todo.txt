@@ -1,0 +1,15 @@
+- [x] L'Oreal
+- [x] Sephora
+- [x] Nike
+- [x] Adidas
+- [x] Apple
+- [x] Microsoft
+- [x] Amazon
+- [x] Google
+- [x] Samsung
+- [x] Sony
+- [x] Walmart
+- [x] Target
+- [x] Home Depot
+- [x] Best Buy
+- [x] Costco
