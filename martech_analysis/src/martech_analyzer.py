@@ -202,44 +202,41 @@ class MartechAnalyzer:
             src = tag.get('src', '').lower()
             script_content = tag.string.lower() if tag.string else ''
             
-            # CMS detection
-            cms_patterns = {
-                'wp-content': 'WordPress',
-                'drupal': 'Drupal',
-                'sitecore': 'Sitecore',
-                'aem': 'Adobe Experience Manager',
-                'umbraco': 'Umbraco'
+            # Common technology patterns
+            patterns = {
+                'cms': {
+                    'wp-content': 'WordPress',
+                    'drupal': 'Drupal',
+                    'sitecore': 'Sitecore',
+                    'aem': 'Adobe Experience Manager',
+                    'umbraco': 'Umbraco',
+                    'adobe experience': 'Adobe Experience Manager',
+                    '/etc/clientlibs': 'Adobe Experience Manager'
+                },
+                'personalization': {
+                    'optimizely': 'Optimizely',
+                    'adobe.target': 'Adobe Target',
+                    'tealium': 'Tealium',
+                    'dynamic yield': 'Dynamic Yield',
+                    'monetate': 'Monetate',
+                    'mbox.js': 'Adobe Target',
+                    'at.js': 'Adobe Target'
+                },
+                'search': {
+                    'algolia': 'Algolia',
+                    'elasticsearch': 'Elasticsearch',
+                    'coveo': 'Coveo',
+                    'searchspring': 'SearchSpring',
+                    'klevu': 'Klevu',
+                    'instantsearch.js': 'Algolia'
+                }
             }
-            for pattern, cms in cms_patterns.items():
-                if pattern in src or pattern in script_content:
-                    technologies['cms'].add(cms)
-                    print(f"Found CMS: {cms}")
             
-            # Personalization tools
-            personalization_patterns = {
-                'optimizely': 'Optimizely',
-                'adobe.target': 'Adobe Target',
-                'tealium': 'Tealium',
-                'dynamic yield': 'Dynamic Yield',
-                'monetate': 'Monetate'
-            }
-            for pattern, tool in personalization_patterns.items():
-                if pattern in src or pattern in script_content:
-                    technologies['personalization'].add(tool)
-                    print(f"Found Personalization: {tool}")
-                
-            # Search vendors
-            search_patterns = {
-                'algolia': 'Algolia',
-                'elasticsearch': 'Elasticsearch',
-                'coveo': 'Coveo',
-                'searchspring': 'SearchSpring',
-                'klevu': 'Klevu'
-            }
-            for pattern, vendor in search_patterns.items():
-                if pattern in src or pattern in script_content:
-                    technologies['search'].add(vendor)
-                    print(f"Found Search: {vendor}")
+            for category, category_patterns in patterns.items():
+                for pattern, vendor in category_patterns.items():
+                    if pattern in src or pattern in script_content:
+                        technologies[category].add(vendor)
+                        print(f"Found {category.title()}: {vendor}")
                     
         except Exception as e:
             print(f"Error analyzing script tag: {str(e)}")
@@ -274,9 +271,10 @@ class MartechAnalyzer:
                     
                     # Calculate weights for each category on this domain
                     for category in tech_stack:
-                        if tech_stack[category]:
-                            weight = 1.0 / len(tech_stack[category])
-                            for tech in tech_stack[category]:
+                        technologies = [t.strip() for t in tech_stack[category].split(',') if t.strip()]
+                        if technologies:
+                            weight = 1.0 / len(technologies)
+                            for tech in technologies:
                                 brand_tech_stack[category][tech] += weight
                                 print(f"Added weight {weight} to {tech} in {category}")
                     
@@ -284,9 +282,9 @@ class MartechAnalyzer:
                     domain_result = {
                         'brand': brand,
                         'domain': domain,
-                        'cms': ','.join(tech_stack['cms']),
-                        'personalization': ','.join(tech_stack['personalization']),
-                        'search': ','.join(tech_stack['search'])
+                        'cms': tech_stack['cms'],
+                        'personalization': tech_stack['personalization'],
+                        'search': tech_stack['search']
                     }
                     self.results.append(domain_result)
                     print(f"Saved domain result: {domain_result}")
@@ -309,8 +307,6 @@ class MartechAnalyzer:
                     }
                     self.results.append(brand_result)
                     print(f"Added {category} technology {tech} with weight {weight}")
-            
-            # Brand-level results already saved above
                 
         self._save_results()
     
