@@ -15,6 +15,10 @@ class MartechAnalyzer:
         self.output_csv = output_csv
         self.results = []
         
+        # Ensure output directory exists
+        import os
+        os.makedirs(os.path.dirname(output_csv), exist_ok=True)
+        
     def load_next_brand(self) -> str:
         with open(self.todo_file, 'r') as f:
             lines = f.readlines()
@@ -161,44 +165,51 @@ class MartechAnalyzer:
             technologies['search'].add('Coveo')
                 
     def _analyze_script_tag(self, tag, technologies: Dict[str, Set[str]]):
-        src = tag.get('src', '').lower()
-        script_content = tag.string.lower() if tag.string else ''
-        
-        # CMS detection
-        cms_patterns = {
-            'wp-content': 'WordPress',
-            'drupal': 'Drupal',
-            'sitecore': 'Sitecore',
-            'aem': 'Adobe Experience Manager',
-            'umbraco': 'Umbraco'
-        }
-        for pattern, cms in cms_patterns.items():
-            if pattern in src or pattern in script_content:
-                technologies['cms'].add(cms)
-        
-        # Personalization tools
-        personalization_patterns = {
-            'optimizely': 'Optimizely',
-            'adobe.target': 'Adobe Target',
-            'tealium': 'Tealium',
-            'dynamic yield': 'Dynamic Yield',
-            'monetate': 'Monetate'
-        }
-        for pattern, tool in personalization_patterns.items():
-            if pattern in src or pattern in script_content:
-                technologies['personalization'].add(tool)
+        try:
+            src = tag.get('src', '').lower()
+            script_content = tag.string.lower() if tag.string else ''
             
-        # Search vendors
-        search_patterns = {
-            'algolia': 'Algolia',
-            'elasticsearch': 'Elasticsearch',
-            'coveo': 'Coveo',
-            'searchspring': 'SearchSpring',
-            'klevu': 'Klevu'
-        }
-        for pattern, vendor in search_patterns.items():
-            if pattern in src or pattern in script_content:
-                technologies['search'].add(vendor)
+            # CMS detection
+            cms_patterns = {
+                'wp-content': 'WordPress',
+                'drupal': 'Drupal',
+                'sitecore': 'Sitecore',
+                'aem': 'Adobe Experience Manager',
+                'umbraco': 'Umbraco'
+            }
+            for pattern, cms in cms_patterns.items():
+                if pattern in src or pattern in script_content:
+                    technologies['cms'].add(cms)
+                    print(f"Found CMS: {cms}")
+            
+            # Personalization tools
+            personalization_patterns = {
+                'optimizely': 'Optimizely',
+                'adobe.target': 'Adobe Target',
+                'tealium': 'Tealium',
+                'dynamic yield': 'Dynamic Yield',
+                'monetate': 'Monetate'
+            }
+            for pattern, tool in personalization_patterns.items():
+                if pattern in src or pattern in script_content:
+                    technologies['personalization'].add(tool)
+                    print(f"Found Personalization: {tool}")
+                
+            # Search vendors
+            search_patterns = {
+                'algolia': 'Algolia',
+                'elasticsearch': 'Elasticsearch',
+                'coveo': 'Coveo',
+                'searchspring': 'SearchSpring',
+                'klevu': 'Klevu'
+            }
+            for pattern, vendor in search_patterns.items():
+                if pattern in src or pattern in script_content:
+                    technologies['search'].add(vendor)
+                    print(f"Found Search: {vendor}")
+                    
+        except Exception as e:
+            print(f"Error analyzing script tag: {str(e)}")
             
     def process_brands(self):
         print("Starting brand analysis...")
@@ -361,9 +372,29 @@ class MartechAnalyzer:
             technologies['search'].add('Coveo')
 
 if __name__ == "__main__":
+    import os
+    
+    # Create output directory
+    os.makedirs('martech_analysis/output', exist_ok=True)
+    
+    # Create todo file if it doesn't exist
+    if not os.path.exists('/home/ubuntu/todo.txt'):
+        with open('martech_analysis/data/brands.txt', 'r') as f:
+            brands = [line.strip() for line in f if line.strip()]
+        with open('/home/ubuntu/todo.txt', 'w') as f:
+            for brand in brands:
+                f.write(f'- [ ] {brand}\n')
+    
     analyzer = MartechAnalyzer(
         todo_file='/home/ubuntu/todo.txt',
         output_csv='martech_analysis/output/martech_results.csv'
     )
-    analyzer.process_brands()
-    analyzer.generate_charts()
+    
+    try:
+        analyzer.process_brands()
+        analyzer.generate_charts()
+        print("\nAnalysis complete! Check the output files:")
+        print("1. martech_analysis/output/domain_results.csv")
+        print("2. martech_analysis/output/martech_results.csv")
+    except Exception as e:
+        print(f"\nError during analysis: {str(e)}")
