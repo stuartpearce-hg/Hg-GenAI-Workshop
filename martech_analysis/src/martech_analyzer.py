@@ -1,5 +1,6 @@
 import csv
 import requests
+import urllib3
 from bs4 import BeautifulSoup, Comment
 from typing import List, Dict, Set
 from urllib.parse import urlparse
@@ -8,6 +9,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from collections import defaultdict
 from requests.exceptions import Timeout, RequestException
+
+# Suppress SSL verification warnings
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class MartechAnalyzer:
     def __init__(self, todo_file: str, output_csv: str):
@@ -35,10 +39,12 @@ class MartechAnalyzer:
     
     def find_domains(self, brand: str) -> List[str]:
         """Find domain variations for a brand."""
+        print(f"\nFinding domains for brand: {brand}")
         domains = set()
         
         # Clean brand name for domain construction
         clean_brand = brand.lower().replace("'", "").replace(" ", "")
+        print(f"Cleaned brand name: {clean_brand}")
         
         # Common domain patterns - limited to main TLDs
         tlds = ['.com', '.co.uk']
@@ -50,34 +56,47 @@ class MartechAnalyzer:
         # Generate domain combinations
         for pattern in patterns:
             for tld in tlds:
-                domains.add(f"{pattern}{tld}")
+                domain = f"{pattern}{tld}"
+                domains.add(domain)
+                print(f"Generated domain: {domain}")
         
         # Special case for brands that might have 'company' or 'corp' in domain
-        domains.add(f"{clean_brand}company.com")
-        domains.add(f"{clean_brand}corp.com")
+        special_domains = [
+            f"{clean_brand}company.com",
+            f"{clean_brand}corp.com"
+        ]
+        for domain in special_domains:
+            domains.add(domain)
+            print(f"Generated special domain: {domain}")
+        
+        print(f"Testing {len(domains)} potential domains...")
         
         # Filter domains that actually resolve or have web servers
         valid_domains = []
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
         
         for domain in domains:
             try:
+                print(f"Testing domain: {domain}")
+                url = f"https://{domain}"
                 response = requests.head(
-                    f"https://{domain}",
-                    timeout=3,
+                    url,
+                    timeout=5,
                     allow_redirects=True,
-                    headers=headers
+                    headers=headers,
+                    verify=False  # Ignore SSL errors
                 )
+                print(f"Response status for {domain}: {response.status_code}")
                 if response.status_code < 400:
                     valid_domains.append(domain)
-                    print(f"Found valid domain: {domain}")
+                    print(f"✓ Found valid domain: {domain}")
             except (Timeout, RequestException) as e:
-                print(f"Connection error for {domain}: {str(e)}")
+                print(f"✗ Connection error for {domain}: {str(e)}")
                 continue
             except Exception as e:
-                print(f"Unexpected error for {domain}: {str(e)}")
+                print(f"✗ Unexpected error for {domain}: {str(e)}")
                 continue
         
         return valid_domains if valid_domains else [f"www.{clean_brand}.com"]
