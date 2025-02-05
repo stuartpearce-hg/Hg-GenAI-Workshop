@@ -36,13 +36,11 @@ class MartechAnalyzer:
         # Clean brand name for domain construction
         clean_brand = brand.lower().replace("'", "").replace(" ", "")
         
-        # Common domain patterns
-        tlds = ['.com', '.co.uk', '.de', '.fr', '.es', '.it']
+        # Common domain patterns - limited to main TLDs
+        tlds = ['.com', '.co.uk']
         patterns = [
             f"www.{clean_brand}",  # www.brand.com
-            clean_brand,           # brand.com
-            f"{clean_brand}-group",# brand-group.com
-            f"{clean_brand}global" # brandglobal.com
+            clean_brand            # brand.com
         ]
         
         # Generate domain combinations
@@ -56,16 +54,26 @@ class MartechAnalyzer:
         
         # Filter domains that actually resolve or have web servers
         valid_domains = []
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        
         for domain in domains:
             try:
                 response = requests.head(
                     f"https://{domain}",
-                    timeout=5,
-                    allow_redirects=True
+                    timeout=3,
+                    allow_redirects=True,
+                    headers=headers
                 )
                 if response.status_code < 400:
                     valid_domains.append(domain)
-            except:
+                    print(f"Found valid domain: {domain}")
+            except (Timeout, RequestException) as e:
+                print(f"Connection error for {domain}: {str(e)}")
+                continue
+            except Exception as e:
+                print(f"Unexpected error for {domain}: {str(e)}")
                 continue
         
         return valid_domains if valid_domains else [f"www.{clean_brand}.com"]
@@ -77,9 +85,20 @@ class MartechAnalyzer:
             'search': set()
         }
         
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        
         try:
-            response = requests.get(f"https://{domain}", timeout=10)
-            soup = BeautifulSoup(response.text, 'html.parser')
+            response = requests.get(
+                f"https://{domain}",
+                timeout=3,
+                headers=headers
+            )
+            response.raise_for_status()
+            
+            html_content = response.text.lower()
+            soup = BeautifulSoup(html_content, 'html.parser')
             
             # Meta tags analysis
             meta_tags = soup.find_all('meta')
@@ -91,8 +110,23 @@ class MartechAnalyzer:
             for tag in script_tags:
                 self._analyze_script_tag(tag, technologies)
                 
+            # Link tags analysis
+            link_tags = soup.find_all('link')
+            for tag in link_tags:
+                self._analyze_link_tag(tag, technologies)
+                
+            # HTML comments analysis
+            comments = soup.find_all(string=lambda text: isinstance(text, Comment))
+            for comment in comments:
+                self._analyze_comment(comment, technologies)
+                
+            # Full HTML content analysis
+            self._analyze_html_content(html_content, technologies)
+                
+        except (Timeout, RequestException) as e:
+            print(f"Connection error analyzing {domain}: {str(e)}")
         except Exception as e:
-            print(f"Error analyzing {domain}: {str(e)}")
+            print(f"Unexpected error analyzing {domain}: {str(e)}")
             
         return technologies
     
