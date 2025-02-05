@@ -131,30 +131,74 @@ class MartechAnalyzer:
         return technologies
     
     def _analyze_meta_tag(self, tag, technologies: Dict[str, Set[str]]):
-        # Common CMS indicators
-        if tag.get('name') == 'generator':
-            content = tag.get('content', '').lower()
-            if 'wordpress' in content:
-                technologies['cms'].add('WordPress')
-            elif 'drupal' in content:
-                technologies['cms'].add('Drupal')
-            elif 'joomla' in content:
-                technologies['cms'].add('Joomla')
+        content = tag.get('content', '').lower()
+        name = tag.get('name', '').lower()
+        
+        # CMS detection
+        if name == 'generator':
+            cms_patterns = {
+                'wordpress': 'WordPress',
+                'drupal': 'Drupal',
+                'joomla': 'Joomla',
+                'sitecore': 'Sitecore',
+                'adobe': 'Adobe Experience Manager',
+                'umbraco': 'Umbraco'
+            }
+            for pattern, cms in cms_patterns.items():
+                if pattern in content:
+                    technologies['cms'].add(cms)
+                    
+        # Personalization detection
+        if 'adobe target' in content or 'adobe marketing cloud' in content:
+            technologies['personalization'].add('Adobe Target')
+        if 'optimizely' in content:
+            technologies['personalization'].add('Optimizely')
+            
+        # Search detection
+        if 'algolia' in content:
+            technologies['search'].add('Algolia')
+        if 'coveo' in content:
+            technologies['search'].add('Coveo')
                 
     def _analyze_script_tag(self, tag, technologies: Dict[str, Set[str]]):
         src = tag.get('src', '').lower()
+        script_content = tag.string.lower() if tag.string else ''
+        
+        # CMS detection
+        cms_patterns = {
+            'wp-content': 'WordPress',
+            'drupal': 'Drupal',
+            'sitecore': 'Sitecore',
+            'aem': 'Adobe Experience Manager',
+            'umbraco': 'Umbraco'
+        }
+        for pattern, cms in cms_patterns.items():
+            if pattern in src or pattern in script_content:
+                technologies['cms'].add(cms)
         
         # Personalization tools
-        if 'optimizely' in src:
-            technologies['personalization'].add('Optimizely')
-        elif 'adobe' in src and 'target' in src:
-            technologies['personalization'].add('Adobe Target')
+        personalization_patterns = {
+            'optimizely': 'Optimizely',
+            'adobe.target': 'Adobe Target',
+            'tealium': 'Tealium',
+            'dynamic yield': 'Dynamic Yield',
+            'monetate': 'Monetate'
+        }
+        for pattern, tool in personalization_patterns.items():
+            if pattern in src or pattern in script_content:
+                technologies['personalization'].add(tool)
             
         # Search vendors
-        if 'algolia' in src:
-            technologies['search'].add('Algolia')
-        elif 'elasticsearch' in src:
-            technologies['search'].add('Elasticsearch')
+        search_patterns = {
+            'algolia': 'Algolia',
+            'elasticsearch': 'Elasticsearch',
+            'coveo': 'Coveo',
+            'searchspring': 'SearchSpring',
+            'klevu': 'Klevu'
+        }
+        for pattern, vendor in search_patterns.items():
+            if pattern in src or pattern in script_content:
+                technologies['search'].add(vendor)
             
     def process_brands(self):
         print("Starting brand analysis...")
