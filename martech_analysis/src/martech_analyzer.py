@@ -24,18 +24,27 @@ class MartechAnalyzer:
         os.makedirs(os.path.dirname(output_csv), exist_ok=True)
         
     def load_next_brand(self) -> str:
-        with open(self.todo_file, 'r') as f:
-            lines = f.readlines()
+        print("\nLoading next brand from todo file...")
+        try:
+            with open(self.todo_file, 'r') as f:
+                lines = f.readlines()
+                print(f"Found {len(lines)} lines in todo file")
             
-        for i, line in enumerate(lines):
-            if line.startswith('- [ ]'):
-                brand = line[5:].strip()
-                # Mark as processed
-                lines[i] = line.replace('- [ ]', '- [x]')
-                with open(self.todo_file, 'w') as f:
-                    f.writelines(lines)
-                return brand
-        return None
+            for i, line in enumerate(lines):
+                print(f"Checking line {i+1}: {line.strip()}")
+                if line.startswith('- [ ]'):
+                    brand = line[5:].strip()
+                    print(f"Found unprocessed brand: {brand}")
+                    # Mark as processed
+                    lines[i] = line.replace('- [ ]', '- [x]')
+                    with open(self.todo_file, 'w') as f:
+                        f.writelines(lines)
+                    return brand
+            print("No unprocessed brands found in todo file")
+            return None
+        except Exception as e:
+            print(f"Error loading brands: {str(e)}")
+            return None
     
     def find_domains(self, brand: str) -> List[str]:
         """Find domain variations for a brand."""
@@ -101,7 +110,7 @@ class MartechAnalyzer:
         
         return valid_domains if valid_domains else [f"www.{clean_brand}.com"]
     
-    def analyze_domain(self, domain: str) -> Dict[str, Set[str]]:
+    def analyze_domain(self, domain: str) -> Dict[str, str]:
         technologies = {
             'cms': set(),
             'personalization': set(),
@@ -115,8 +124,9 @@ class MartechAnalyzer:
         try:
             response = requests.get(
                 f"https://{domain}",
-                timeout=3,
-                headers=headers
+                timeout=5,
+                headers=headers,
+                verify=False
             )
             response.raise_for_status()
             
@@ -151,7 +161,11 @@ class MartechAnalyzer:
         except Exception as e:
             print(f"Unexpected error analyzing {domain}: {str(e)}")
             
-        return technologies
+        return {
+            'cms': ', '.join(technologies['cms']),
+            'personalization': ', '.join(technologies['personalization']),
+            'search': ', '.join(technologies['search'])
+        }
     
     def _analyze_meta_tag(self, tag, technologies: Dict[str, Set[str]]):
         content = tag.get('content', '').lower()
@@ -296,16 +310,7 @@ class MartechAnalyzer:
                     self.results.append(brand_result)
                     print(f"Added {category} technology {tech} with weight {weight}")
             
-            # Add weighted results for the brand
-            for category in ['cms', 'personalization', 'search']:
-                for tech, weight in brand_tech_stack[category].items():
-                    self.results.append({
-                        'brand': brand,
-                        'domain': '*BRAND_TOTAL*',
-                        'technology_type': category,
-                        'technology': tech,
-                        'weight': weight
-                    })
+            # Brand-level results already saved above
                 
         self._save_results()
     
@@ -333,38 +338,21 @@ class MartechAnalyzer:
             self._generate_category_charts(df, category)
     
     def _generate_category_charts(self, df: pd.DataFrame, category: str):
-        # Split multiple technologies per cell
-        tech_counts = defaultdict(int)
-        brand_counts = defaultdict(set)
+        # Filter for brand totals and get technology distribution
+        brand_df = df[df['domain'] == '*BRAND_TOTAL*']
+        brand_df = brand_df[brand_df['technology_type'] == category.lower()]
         
-        for _, row in df.iterrows():
-            if pd.notna(row[category]):
-                techs = row[category].split(',')
-                for tech in techs:
-                    tech = tech.strip()
-                    if tech:
-                        tech_counts[tech] += 1
-                        brand_counts[tech].add(row['brand'])
-        
-        # Convert brand sets to counts
-        brand_counts = {k: len(v) for k, v in brand_counts.items()}
+        # Group by technology and sum weights
+        tech_weights = brand_df.groupby('technology')['weight'].sum().sort_values(ascending=False)
         
         # Create domain count chart
-        plt.figure(figsize=(10, 6))
-        plt.bar(tech_counts.keys(), tech_counts.values())
-        plt.title(f'{category.title()} Distribution by Domain Count')
-        plt.xticks(rotation=45)
+        plt.figure(figsize=(12, 6))
+        plt.bar(list(tech_weights.index), list(tech_weights.values))
+        plt.title(f'{category.title()} Distribution by Weighted Score')
+        plt.xticks(rotation=45, ha='right')
+        plt.ylabel('Weighted Score')
         plt.tight_layout()
-        plt.savefig(f'martech_analysis/output/{category}_domain_distribution.png')
-        plt.close()
-        
-        # Create brand count chart
-        plt.figure(figsize=(10, 6))
-        plt.bar(brand_counts.keys(), brand_counts.values())
-        plt.title(f'{category.title()} Distribution by Brand Count')
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-        plt.savefig(f'martech_analysis/output/{category}_brand_distribution.png')
+        plt.savefig(f'martech_analysis/output/{category}_distribution.png')
         plt.close()
 
     def _analyze_link_tag(self, tag, technologies: Dict[str, Set[str]]):
