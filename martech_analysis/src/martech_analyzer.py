@@ -220,7 +220,7 @@ class MartechAnalyzer:
                 
             print(f"\nAnalyzing brand: {brand}")
             domains = self.find_domains(brand)
-            print(f"Found {len(domains)} domains for {brand}")
+            print(f"Found {len(domains)} domains for {brand}: {domains}")
             
             brand_tech_stack = {
                 'cms': defaultdict(float),
@@ -228,10 +228,16 @@ class MartechAnalyzer:
                 'search': defaultdict(float)
             }
             
+            domain_count = 0
             for domain in domains:
                 try:
-                    print(f"Analyzing domain: {domain}")
+                    print(f"\nAnalyzing domain: {domain}")
                     tech_stack = self.analyze_domain(domain)
+                    
+                    # Log detected technologies
+                    for category, techs in tech_stack.items():
+                        if techs:
+                            print(f"Found {category} technologies: {techs}")
                     
                     # Calculate weights for each category on this domain
                     for category in tech_stack:
@@ -239,18 +245,37 @@ class MartechAnalyzer:
                             weight = 1.0 / len(tech_stack[category])
                             for tech in tech_stack[category]:
                                 brand_tech_stack[category][tech] += weight
+                                print(f"Added weight {weight} to {tech} in {category}")
                     
-                    # Store raw results
-                    self.results.append({
+                    # Store raw domain results
+                    domain_result = {
                         'brand': brand,
                         'domain': domain,
                         'cms': ','.join(tech_stack['cms']),
                         'personalization': ','.join(tech_stack['personalization']),
                         'search': ','.join(tech_stack['search'])
-                    })
+                    }
+                    self.results.append(domain_result)
+                    print(f"Saved domain result: {domain_result}")
+                    domain_count += 1
+                    
                 except Exception as e:
                     print(f"Error analyzing {domain}: {str(e)}")
                     continue
+            
+            # Save brand-level weighted results
+            print(f"\nSaving brand-level results for {brand}:")
+            for category in ['cms', 'personalization', 'search']:
+                for tech, weight in brand_tech_stack[category].items():
+                    brand_result = {
+                        'brand': brand,
+                        'domain': '*BRAND_TOTAL*',
+                        'technology_type': category,
+                        'technology': tech,
+                        'weight': weight
+                    }
+                    self.results.append(brand_result)
+                    print(f"Added {category} technology {tech} with weight {weight}")
             
             # Add weighted results for the brand
             for category in ['cms', 'personalization', 'search']:
