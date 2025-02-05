@@ -8,3 +8,8 @@ Amazon
 Google
 Samsung
 Sony
+Walmart
+Target
+Home Depot
+Best Buy
+Costco
