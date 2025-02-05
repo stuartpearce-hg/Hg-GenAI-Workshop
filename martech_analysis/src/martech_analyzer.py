@@ -9,19 +9,65 @@ import seaborn as sns
 from collections import defaultdict
 
 class MartechAnalyzer:
-    def __init__(self, brands_file: str, output_csv: str):
-        self.brands_file = brands_file
+    def __init__(self, todo_file: str, output_csv: str):
+        self.todo_file = todo_file
         self.output_csv = output_csv
         self.results = []
         
-    def load_brands(self) -> List[str]:
-        with open(self.brands_file, 'r') as f:
-            return [line.strip() for line in f if line.strip()]
+    def load_next_brand(self) -> str:
+        with open(self.todo_file, 'r') as f:
+            lines = f.readlines()
+            
+        for i, line in enumerate(lines):
+            if line.startswith('- [ ]'):
+                brand = line[5:].strip()
+                # Mark as processed
+                lines[i] = line.replace('- [ ]', '- [x]')
+                with open(self.todo_file, 'w') as f:
+                    f.writelines(lines)
+                return brand
+        return None
     
     def find_domains(self, brand: str) -> List[str]:
-        # TODO: Implement domain discovery logic
-        # For now, return basic domain pattern
-        return [f"www.{brand.lower().replace(' ', '')}.com"]
+        """Find domain variations for a brand."""
+        domains = set()
+        
+        # Clean brand name for domain construction
+        clean_brand = brand.lower().replace("'", "").replace(" ", "")
+        
+        # Common domain patterns
+        tlds = ['.com', '.co.uk', '.de', '.fr', '.es', '.it']
+        patterns = [
+            f"www.{clean_brand}",  # www.brand.com
+            clean_brand,           # brand.com
+            f"{clean_brand}-group",# brand-group.com
+            f"{clean_brand}global" # brandglobal.com
+        ]
+        
+        # Generate domain combinations
+        for pattern in patterns:
+            for tld in tlds:
+                domains.add(f"{pattern}{tld}")
+        
+        # Special case for brands that might have 'company' or 'corp' in domain
+        domains.add(f"{clean_brand}company.com")
+        domains.add(f"{clean_brand}corp.com")
+        
+        # Filter domains that actually resolve or have web servers
+        valid_domains = []
+        for domain in domains:
+            try:
+                response = requests.head(
+                    f"https://{domain}",
+                    timeout=5,
+                    allow_redirects=True
+                )
+                if response.status_code < 400:
+                    valid_domains.append(domain)
+            except:
+                continue
+        
+        return valid_domains if valid_domains else [f"www.{clean_brand}.com"]
     
     def analyze_domain(self, domain: str) -> Dict[str, Set[str]]:
         technologies = {
@@ -76,9 +122,11 @@ class MartechAnalyzer:
             technologies['search'].add('Elasticsearch')
             
     def process_brands(self):
-        brands = self.load_brands()
-        
-        for brand in brands:
+        while True:
+            brand = self.load_next_brand()
+            if brand is None:
+                break
+                
             domains = self.find_domains(brand)
             for domain in domains:
                 tech_stack = self.analyze_domain(domain)
@@ -143,7 +191,7 @@ class MartechAnalyzer:
 
 if __name__ == "__main__":
     analyzer = MartechAnalyzer(
-        brands_file='martech_analysis/data/brands.txt',
+        todo_file='/home/ubuntu/todo.txt',
         output_csv='martech_analysis/output/martech_results.csv'
     )
     analyzer.process_brands()
