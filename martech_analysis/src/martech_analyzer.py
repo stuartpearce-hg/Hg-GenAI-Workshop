@@ -80,37 +80,13 @@ class MartechAnalyzer:
         
         print(f"Testing {len(domains)} potential domains...")
         
-        # Filter domains that actually resolve or have web servers
-        valid_domains = []
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-        
-        for domain in domains:
-            try:
-                print(f"Testing domain: {domain}")
-                url = f"https://{domain}"
-                response = requests.head(
-                    url,
-                    timeout=5,
-                    allow_redirects=True,
-                    headers=headers,
-                    verify=False  # Ignore SSL errors
-                )
-                print(f"Response status for {domain}: {response.status_code}")
-                if response.status_code < 400:
-                    valid_domains.append(domain)
-                    print(f"✓ Found valid domain: {domain}")
-            except (Timeout, RequestException) as e:
-                print(f"✗ Connection error for {domain}: {str(e)}")
-                continue
-            except Exception as e:
-                print(f"✗ Unexpected error for {domain}: {str(e)}")
-                continue
-        
-        return valid_domains if valid_domains else [f"www.{clean_brand}.com"]
+        # For testing, return first domain without validation
+        test_domain = next(iter(domains))
+        print(f"Using test domain: {test_domain}")
+        return [test_domain]
     
     def analyze_domain(self, domain: str) -> Dict[str, str]:
+        print(f"\n=== Detailed Analysis for {domain} ===")
         technologies = {
             'cms': set(),
             'personalization': set(),
@@ -118,7 +94,112 @@ class MartechAnalyzer:
         }
         
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        }
+        
+        try:
+            print(f"\nAnalyzing HTML content for {domain}")
+            
+            # Check for Adobe Experience Cloud domains
+            adobe_domains = [
+                f"{domain.split('.')[0]}.tt.omtrdc.net",
+                f"{domain.split('.')[0]}.sc.omtrdc.net",
+                f"{domain.split('.')[0]}.demdex.net"
+            ]
+            
+            for adobe_domain in adobe_domains:
+                try:
+                    adobe_response = requests.head(
+                        f"https://{adobe_domain}",
+                        timeout=5,
+                        headers=headers,
+                        verify=False
+                    )
+                    if adobe_response.status_code < 400:
+                        print(f"Found Adobe domain: {adobe_domain}")
+                        technologies['cms'].add('Adobe Experience Manager')
+                        technologies['personalization'].add('Adobe Target')
+                        break
+                except:
+                    continue
+                    
+            response = requests.get(
+                f"https://{domain}",
+                timeout=10,
+                headers=headers,
+                verify=False
+            )
+            response.raise_for_status()
+            
+            html_content = response.text
+            print(f"Retrieved {len(html_content)} bytes of HTML content")
+            
+            # Initial HTML analysis
+            html_lower = html_content.lower()
+            
+            # Adobe detection
+            if any(x in html_lower for x in ['mbox.js', 'at.js', 'adobe.target', 'mboxdefine', '/etc.clientlibs/', 'dam/experience-fragments']):
+                technologies['cms'].add('Adobe Experience Manager')
+                technologies['personalization'].add('Adobe Target')
+            
+            # Sitecore detection
+            if any(x in html_lower for x in ['sitecore', '_scwebapp', 'sc_site', 'sxa-', '/sitecore/shell']):
+                technologies['cms'].add('Sitecore')
+                technologies['personalization'].add('Sitecore Personalization')
+            
+            # Optimizely detection
+            if any(x in html_lower for x in ['optimizely', 'optimizelyDataApi', 'optimizely.init']):
+                technologies['personalization'].add('Optimizely')
+            
+            # Contentful detection
+            if any(x in html_lower for x in ['contentful', 'ctfl-', 'contentful-delivery']):
+                technologies['cms'].add('Contentful')
+            
+            # Drupal detection
+            if any(x in html_lower for x in ['drupal', 'sites/default/files', 'drupal.settings']):
+                technologies['cms'].add('Drupal')
+            
+            # Salesforce detection
+            if any(x in html_lower for x in ['salesforce', 'sfmc-', 'force.com', 'marketing-cloud-']):
+                technologies['personalization'].add('Salesforce')
+                technologies['search'].add('Salesforce Search')
+            
+            # Acquia detection
+            if any(x in html_lower for x in ['acquia', 'acquiadam', 'acquia-content']):
+                technologies['cms'].add('Acquia')
+            
+            # Liferay detection
+            if any(x in html_lower for x in ['liferay', 'lfr-', 'liferay-portal']):
+                technologies['cms'].add('Liferay')
+            
+            # BloomReach detection
+            if any(x in html_lower for x in ['bloomreach', 'br-', 'hippo:docbase', 'brx-']):
+                technologies['cms'].add('BloomReach')
+                technologies['search'].add('BloomReach Search')
+            
+            soup = BeautifulSoup(html_content, 'html.parser')
+            
+            # Analyze meta tags, scripts, and comments
+            self._analyze_meta_tag(soup.find_all('meta'), technologies)
+            self._analyze_script_tag(soup.find_all('script'), technologies)
+            self._analyze_link_tag(soup.find_all('link'), technologies)
+            self._analyze_comment(soup.find_all(string=lambda text: isinstance(text, Comment)), technologies)
+            self._analyze_html_content(html_content, technologies)
+            
+        except Exception as e:
+            print(f"Error analyzing {domain}: {str(e)}")
+        
+        # Convert sets to comma-separated strings
+        result = {
+            'cms': ','.join(technologies['cms']) or 'Unknown',
+            'personalization': ','.join(technologies['personalization']) or 'Unknown',
+            'search': ','.join(technologies['search']) or 'Unknown'
+        }
+        
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
         }
         
         try:
@@ -200,11 +281,7 @@ class MartechAnalyzer:
         except Exception as e:
             print(f"Unexpected error analyzing {domain}: {str(e)}")
             
-        return {
-            'cms': ', '.join(technologies['cms']),
-            'personalization': ', '.join(technologies['personalization']),
-            'search': ', '.join(technologies['search'])
-        }
+        return result
     
     def _analyze_meta_tag(self, tag, technologies: Dict[str, Set[str]]):
         content = tag.get('content', '').lower()
@@ -300,6 +377,8 @@ class MartechAnalyzer:
             
     def process_brands(self):
         print("Starting brand analysis...")
+        self.results = []  # Reset results list
+        
         while True:
             brand = self.load_next_brand()
             if brand is None:
@@ -309,33 +388,13 @@ class MartechAnalyzer:
             domains = self.find_domains(brand)
             print(f"Found {len(domains)} domains for {brand}: {domains}")
             
-            brand_tech_stack = {
-                'cms': defaultdict(float),
-                'personalization': defaultdict(float),
-                'search': defaultdict(float)
-            }
-            
-            domain_count = 0
             for domain in domains:
                 try:
                     print(f"\nAnalyzing domain: {domain}")
                     tech_stack = self.analyze_domain(domain)
+                    print(f"Technology stack detected: {tech_stack}")
                     
-                    # Log detected technologies
-                    for category, techs in tech_stack.items():
-                        if techs:
-                            print(f"Found {category} technologies: {techs}")
-                    
-                    # Calculate weights for each category on this domain
-                    for category in tech_stack:
-                        technologies = [t.strip() for t in tech_stack[category].split(',') if t.strip()]
-                        if technologies:
-                            weight = 1.0 / len(technologies)
-                            for tech in technologies:
-                                brand_tech_stack[category][tech] += weight
-                                print(f"Added weight {weight} to {tech} in {category}")
-                    
-                    # Store raw domain results
+                    # Store domain-level results
                     domain_result = {
                         'brand': brand,
                         'domain': domain,
@@ -345,45 +404,63 @@ class MartechAnalyzer:
                     }
                     self.results.append(domain_result)
                     print(f"Saved domain result: {domain_result}")
-                    domain_count += 1
+                    
+                    # Add brand-level results for each technology type
+                    for tech_type in ['cms', 'personalization', 'search']:
+                        if tech_stack[tech_type]:
+                            techs = [t.strip() for t in tech_stack[tech_type].split(',') if t.strip()]
+                            weight = 1.0 / len(techs) if techs else 0
+                            for tech in techs:
+                                brand_result = {
+                                    'brand': brand,
+                                    'domain': '*BRAND_TOTAL*',
+                                    'technology_type': tech_type,
+                                    'technology': tech,
+                                    'weight': weight
+                                }
+                                self.results.append(brand_result)
+                                print(f"Saved brand result: {brand_result}")
                     
                 except Exception as e:
                     print(f"Error analyzing {domain}: {str(e)}")
                     continue
             
-            # Save brand-level weighted results
-            print(f"\nSaving brand-level results for {brand}:")
-            for category in ['cms', 'personalization', 'search']:
-                for tech, weight in brand_tech_stack[category].items():
-                    brand_result = {
-                        'brand': brand,
-                        'domain': '*BRAND_TOTAL*',
-                        'technology_type': category,
-                        'technology': tech,
-                        'weight': weight
-                    }
-                    self.results.append(brand_result)
-                    print(f"Added {category} technology {tech} with weight {weight}")
-                
         self._save_results()
     
     def _save_results(self):
         output_dir = os.path.dirname(self.output_csv)
         
+        print("\nDebug: Results before saving:")
+        for r in self.results:
+            print(f"Result entry: {r}")
+        
+        # Filter results by type
+        domain_results = []
+        brand_results = []
+        
+        for result in self.results:
+            if isinstance(result, dict):
+                if 'technology_type' in result:
+                    brand_results.append(result)
+                else:
+                    domain_results.append(result)
+        
+        print(f"\nFound {len(domain_results)} domain results and {len(brand_results)} brand results")
+        
         # Save detailed domain results
-        domain_results = [r for r in self.results if 'cms' in r]
         domain_results_path = os.path.join(output_dir, 'domain_results.csv')
         with open(domain_results_path, 'w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=['brand', 'domain', 'cms', 'personalization', 'search'])
             writer.writeheader()
             writer.writerows(domain_results)
+            print(f"Saved domain results to {domain_results_path}")
             
         # Save weighted brand results
-        brand_results = [r for r in self.results if 'technology_type' in r]
         with open(self.output_csv, 'w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=['brand', 'domain', 'technology_type', 'technology', 'weight'])
             writer.writeheader()
             writer.writerows(brand_results)
+            print(f"Saved brand results to {self.output_csv}")
     
     def generate_charts(self):
         df = pd.read_csv(self.output_csv)
@@ -477,26 +554,24 @@ class MartechAnalyzer:
         content_lower = content.lower()
         patterns = {
             'cms': {
-                'wordpress': ['wp-content', 'wp-includes', 'wp-json', 'wp-admin'],
-                'drupal': ['drupal.settings', 'drupal-', 'sites/all/modules'],
-                'sitecore': ['sitecore', '_scwebapp'],
-                'aem': ['aem-grid', '/etc/clientlibs', 'foundation-layout', '/content/dam/'],
-                'umbraco': ['umbraco', 'umb_'],
-                'kentico': ['kentico', '/cmssiteutils/']
+                'Adobe Experience Manager': ['aem-grid', '/etc/clientlibs', '/content/dam/', 'cq:template', 'cq-analytics'],
+                'Sitecore': ['sitecore', '_scwebapp', 'sxa-', '/sitecore/shell', 'sc_site'],
+                'Contentful': ['contentful', 'ctfl-', 'contentful-delivery', 'contentful-space'],
+                'Drupal': ['drupal.settings', 'drupal-', 'sites/all/modules', 'sites/default/files'],
+                'Acquia': ['acquia', 'acquiadam', 'acquia-content', 'acquia-site-studio'],
+                'Liferay': ['liferay', 'lfr-', 'liferay-portal', 'liferay-theme'],
+                'BloomReach': ['bloomreach', 'br-', 'hippo:docbase', 'brx-', 'br-snippet']
             },
             'personalization': {
-                'adobe target': ['mboxcreate', 'adobe.target', 'at.js', 'mbox.js', 'target-global-mbox'],
-                'optimizely': ['optimizely', 'optimizelyDataApi'],
-                'tealium': ['tealium', 'utag.js', 'utag_data'],
-                'dynamic yield': ['dy-', 'dynamicyield'],
-                'monetate': ['monetate', 'shopinterest']
+                'Adobe Target': ['mboxcreate', 'adobe.target', 'at.js', 'mbox.js', 'target-global-mbox', 'tt.omtrdc.net'],
+                'Sitecore Personalization': ['sitecore-personalization', 'sc-personalization', 'sitecore-tracking'],
+                'Optimizely': ['optimizely', 'optimizelyDataApi', 'optimizely.init', 'optimizely-snippet'],
+                'Salesforce': ['salesforce', 'sfmc-', 'force.com', 'marketing-cloud-', 'mc-']
             },
             'search': {
-                'algolia': ['algolia', 'instantsearch.js', 'algoliasearch'],
-                'elasticsearch': ['elasticsearch', '_msearch'],
-                'coveo': ['coveo', 'coveoua'],
-                'searchspring': ['searchspring', 'ss-wrapper'],
-                'klevu': ['klevu', 'klevu-']
+                'BloomReach Search': ['bloomreach-search', 'br-search', 'br-suggest'],
+                'Salesforce Search': ['salesforce-search', 'commerce-cloud-search', 'einstein-search'],
+                'Sitecore Search': ['sitecore-search', 'coveo', 'sitecore-suggest']
             }
         }
         

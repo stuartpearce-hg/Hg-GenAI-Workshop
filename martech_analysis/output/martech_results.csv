@@ -1,30 +1,58 @@
 brand,domain,technology_type,technology,weight
-L'Oreal,*BRAND_TOTAL*,personalization,Adobe Target,4.0
-Sephora,*BRAND_TOTAL*,personalization,Dynamic Yield,1.0
+Zurich,*BRAND_TOTAL*,cms,Adobe Experience Manager,0.3333333333333333
+Zurich,*BRAND_TOTAL*,cms,Drupal,0.3333333333333333
+Zurich,*BRAND_TOTAL*,cms,Sitecore,0.3333333333333333
+Zurich,*BRAND_TOTAL*,personalization,Adobe Target,0.5
+Zurich,*BRAND_TOTAL*,personalization,Sitecore Personalization,0.5
+Zurich,*BRAND_TOTAL*,search,Unknown,1.0
+Maersk,*BRAND_TOTAL*,cms,Adobe Experience Manager,0.5
+Maersk,*BRAND_TOTAL*,cms,Sitecore,0.5
+Maersk,*BRAND_TOTAL*,personalization,Adobe Target,0.5
+Maersk,*BRAND_TOTAL*,personalization,Sitecore Personalization,0.5
+Maersk,*BRAND_TOTAL*,search,Unknown,1.0
+L'Oreal,*BRAND_TOTAL*,cms,Adobe Experience Manager,1.0
+L'Oreal,*BRAND_TOTAL*,personalization,Adobe Target,1.0
+L'Oreal,*BRAND_TOTAL*,search,Unknown,1.0
+Sephora,*BRAND_TOTAL*,cms,Adobe Experience Manager,1.0
 Sephora,*BRAND_TOTAL*,personalization,Adobe Target,1.0
-Nike,*BRAND_TOTAL*,personalization,Dynamic Yield,2.5
-Nike,*BRAND_TOTAL*,personalization,Adobe Target,2.5
+Sephora,*BRAND_TOTAL*,search,Unknown,1.0
+Nike,*BRAND_TOTAL*,cms,BloomReach,0.5
+Nike,*BRAND_TOTAL*,cms,Adobe Experience Manager,0.5
+Nike,*BRAND_TOTAL*,personalization,Adobe Target,1.0
+Nike,*BRAND_TOTAL*,search,BloomReach Search,1.0
+Adidas,*BRAND_TOTAL*,cms,Adobe Experience Manager,1.0
 Adidas,*BRAND_TOTAL*,personalization,Adobe Target,1.0
-Apple,*BRAND_TOTAL*,personalization,Adobe Target,5.5
-Apple,*BRAND_TOTAL*,personalization,Dynamic Yield,0.5
-Microsoft,*BRAND_TOTAL*,cms,Aem,5.0
-Microsoft,*BRAND_TOTAL*,personalization,Dynamic Yield,2.5
-Microsoft,*BRAND_TOTAL*,personalization,Adobe Target,2.5
-Amazon,*BRAND_TOTAL*,personalization,Adobe Target,5.0
-Google,*BRAND_TOTAL*,personalization,Adobe Target,4.0
-Samsung,*BRAND_TOTAL*,cms,Aem,1.0
-Samsung,*BRAND_TOTAL*,personalization,Dynamic Yield,0.5
-Samsung,*BRAND_TOTAL*,personalization,Adobe Target,0.5
-Sony,*BRAND_TOTAL*,cms,Aem,2.0
+Adidas,*BRAND_TOTAL*,search,Unknown,1.0
+Apple,*BRAND_TOTAL*,cms,Adobe Experience Manager,1.0
+Apple,*BRAND_TOTAL*,personalization,Adobe Target,1.0
+Apple,*BRAND_TOTAL*,search,Unknown,1.0
+Microsoft,*BRAND_TOTAL*,cms,Adobe Experience Manager,1.0
+Microsoft,*BRAND_TOTAL*,personalization,Adobe Target,1.0
+Microsoft,*BRAND_TOTAL*,search,Unknown,1.0
+Amazon,*BRAND_TOTAL*,cms,Adobe Experience Manager,1.0
+Amazon,*BRAND_TOTAL*,personalization,Adobe Target,1.0
+Amazon,*BRAND_TOTAL*,search,Unknown,1.0
+Google,*BRAND_TOTAL*,cms,Adobe Experience Manager,1.0
+Google,*BRAND_TOTAL*,personalization,Adobe Target,1.0
+Google,*BRAND_TOTAL*,search,Unknown,1.0
+Samsung,*BRAND_TOTAL*,cms,Adobe Experience Manager,1.0
+Samsung,*BRAND_TOTAL*,personalization,Adobe Target,1.0
+Samsung,*BRAND_TOTAL*,search,Unknown,1.0
+Sony,*BRAND_TOTAL*,cms,Adobe Experience Manager,1.0
 Sony,*BRAND_TOTAL*,personalization,Adobe Target,1.0
-Sony,*BRAND_TOTAL*,personalization,Tealium,1.0
-Walmart,*BRAND_TOTAL*,personalization,Dynamic Yield,1.0
+Sony,*BRAND_TOTAL*,search,Unknown,1.0
+Walmart,*BRAND_TOTAL*,cms,Adobe Experience Manager,1.0
 Walmart,*BRAND_TOTAL*,personalization,Adobe Target,1.0
-Target,*BRAND_TOTAL*,personalization,Dynamic Yield,1.0
+Walmart,*BRAND_TOTAL*,search,Unknown,1.0
+Target,*BRAND_TOTAL*,cms,Adobe Experience Manager,1.0
 Target,*BRAND_TOTAL*,personalization,Adobe Target,1.0
+Target,*BRAND_TOTAL*,search,Unknown,1.0
+Home Depot,*BRAND_TOTAL*,cms,Adobe Experience Manager,1.0
 Home Depot,*BRAND_TOTAL*,personalization,Adobe Target,1.0
-Best Buy,*BRAND_TOTAL*,personalization,Dynamic Yield,0.3333333333333333
-Best Buy,*BRAND_TOTAL*,personalization,Adobe Target,0.3333333333333333
-Best Buy,*BRAND_TOTAL*,personalization,Optimizely,0.3333333333333333
-Costco,*BRAND_TOTAL*,personalization,Dynamic Yield,0.5
-Costco,*BRAND_TOTAL*,personalization,Adobe Target,0.5
+Home Depot,*BRAND_TOTAL*,search,Unknown,1.0
+Best Buy,*BRAND_TOTAL*,cms,Adobe Experience Manager,1.0
+Best Buy,*BRAND_TOTAL*,personalization,Adobe Target,1.0
+Best Buy,*BRAND_TOTAL*,search,Unknown,1.0
+Costco,*BRAND_TOTAL*,cms,Adobe Experience Manager,1.0
+Costco,*BRAND_TOTAL*,personalization,Adobe Target,1.0
+Costco,*BRAND_TOTAL*,search,Unknown,1.0

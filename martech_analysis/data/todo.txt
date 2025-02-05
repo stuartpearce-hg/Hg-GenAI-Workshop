@@ -1,3 +1,5 @@
+- [x] Zurich
+- [x] Maersk
 - [x] L'Oreal
 - [x] Sephora
 - [x] Nike

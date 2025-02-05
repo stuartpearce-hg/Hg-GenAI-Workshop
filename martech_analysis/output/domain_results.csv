@@ -1,43 +1,18 @@
 brand,domain,cms,personalization,search
-L'Oreal,www.loreal.co.uk,,Adobe Target,
-L'Oreal,www.loreal.com,,Adobe Target,
-L'Oreal,loreal.com,,Adobe Target,
-L'Oreal,loreal.co.uk,,Adobe Target,
-Sephora,www.sephora.com,,"Dynamic Yield, Adobe Target",
-Sephora,sephora.com,,"Dynamic Yield, Adobe Target",
-Nike,nikecompany.com,,"Dynamic Yield, Adobe Target",
-Nike,www.nike.com,,"Dynamic Yield, Adobe Target",
-Nike,nike.com,,"Dynamic Yield, Adobe Target",
-Nike,www.nike.co.uk,,"Dynamic Yield, Adobe Target",
-Nike,nike.co.uk,,"Dynamic Yield, Adobe Target",
-Adidas,www.adidas.com,,Adobe Target,
-Apple,apple.com,,Adobe Target,
-Apple,www.apple.com,,Adobe Target,
-Apple,applecompany.com,,Adobe Target,
-Apple,applecorp.com,,"Dynamic Yield, Adobe Target",
-Apple,www.apple.co.uk,,Adobe Target,
-Apple,apple.co.uk,,Adobe Target,
-Microsoft,microsoft.com,Aem,"Dynamic Yield, Adobe Target",
-Microsoft,www.microsoft.co.uk,Aem,"Dynamic Yield, Adobe Target",
-Microsoft,microsoft.co.uk,Aem,"Dynamic Yield, Adobe Target",
-Microsoft,www.microsoft.com,Aem,"Dynamic Yield, Adobe Target",
-Microsoft,microsoftcorp.com,Aem,"Dynamic Yield, Adobe Target",
-Amazon,www.amazon.co.uk,,Adobe Target,
-Amazon,amazon.co.uk,,Adobe Target,
-Amazon,amazon.com,,Adobe Target,
-Amazon,amazoncompany.com,,Adobe Target,
-Amazon,www.amazon.com,,Adobe Target,
-Google,google.com,,Adobe Target,
-Google,www.google.com,,Adobe Target,
-Google,www.google.co.uk,,Adobe Target,
-Google,google.co.uk,,Adobe Target,
-Samsung,www.samsung.com,Aem,"Dynamic Yield, Adobe Target",
-Sony,www.sony.co.uk,Aem,"Adobe Target, Tealium",
-Sony,sony.co.uk,Aem,"Adobe Target, Tealium",
-Walmart,www.walmart.com,,"Dynamic Yield, Adobe Target",
-Walmart,walmart.com,,"Dynamic Yield, Adobe Target",
-Target,www.target.com,,"Dynamic Yield, Adobe Target",
-Target,target.com,,"Dynamic Yield, Adobe Target",
-Home Depot,www.homedepot.com,,Adobe Target,
-Best Buy,www.bestbuy.com,,"Dynamic Yield, Adobe Target, Optimizely",
-Costco,www.costco.com,,"Dynamic Yield, Adobe Target",
+Zurich,zurich.com,"Adobe Experience Manager,Drupal,Sitecore","Adobe Target,Sitecore Personalization",Unknown
+Maersk,maersk.com,"Adobe Experience Manager,Sitecore","Adobe Target,Sitecore Personalization",Unknown
+L'Oreal,www.loreal.co.uk,Adobe Experience Manager,Adobe Target,Unknown
+Sephora,sephoracorp.com,Adobe Experience Manager,Adobe Target,Unknown
+Nike,nikecompany.com,"BloomReach,Adobe Experience Manager",Adobe Target,BloomReach Search
+Adidas,www.adidas.com,Adobe Experience Manager,Adobe Target,Unknown
+Apple,applecorp.com,Adobe Experience Manager,Adobe Target,Unknown
+Microsoft,microsoft.com,Adobe Experience Manager,Adobe Target,Unknown
+Amazon,amazoncompany.com,Adobe Experience Manager,Adobe Target,Unknown
+Google,google.com,Adobe Experience Manager,Adobe Target,Unknown
+Samsung,samsung.co.uk,Adobe Experience Manager,Adobe Target,Unknown
+Sony,sonycorp.com,Adobe Experience Manager,Adobe Target,Unknown
+Walmart,www.walmart.co.uk,Adobe Experience Manager,Adobe Target,Unknown
+Target,targetcompany.com,Adobe Experience Manager,Adobe Target,Unknown
+Home Depot,homedepot.co.uk,Adobe Experience Manager,Adobe Target,Unknown
+Best Buy,bestbuy.co.uk,Adobe Experience Manager,Adobe Target,Unknown
+Costco,costco.co.uk,Adobe Experience Manager,Adobe Target,Unknown
