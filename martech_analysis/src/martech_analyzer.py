@@ -118,19 +118,21 @@ class MartechAnalyzer:
         }
         
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
         
         try:
+            print(f"\nAnalyzing HTML content for {domain}")
             response = requests.get(
                 f"https://{domain}",
-                timeout=5,
+                timeout=10,
                 headers=headers,
                 verify=False
             )
             response.raise_for_status()
             
-            html_content = response.text.lower()
+            html_content = response.text
+            print(f"Retrieved {len(html_content)} bytes of HTML content")
             soup = BeautifulSoup(html_content, 'html.parser')
             
             # Meta tags analysis
@@ -199,47 +201,65 @@ class MartechAnalyzer:
                 
     def _analyze_script_tag(self, tag, technologies: Dict[str, Set[str]]):
         try:
-            src = tag.get('src', '').lower()
+            src = tag.get('src', '').lower() if tag.get('src') else ''
             script_content = tag.string.lower() if tag.string else ''
+            data_attrs = ' '.join([f"{k}={v}" for k, v in tag.attrs.items() if k.startswith('data-')]).lower()
             
-            # Common technology patterns
+            # Print debug info for script analysis
+            if src:
+                print(f"Analyzing script src: {src}")
+            if data_attrs:
+                print(f"Found data attributes: {data_attrs}")
+            
             patterns = {
                 'cms': {
-                    'wp-content': 'WordPress',
-                    'drupal': 'Drupal',
-                    'sitecore': 'Sitecore',
-                    'aem': 'Adobe Experience Manager',
-                    'umbraco': 'Umbraco',
-                    'adobe experience': 'Adobe Experience Manager',
-                    '/etc/clientlibs': 'Adobe Experience Manager'
+                    'wordpress': ['wp-content', 'wp-includes', 'wp-json', '/wp-'],
+                    'drupal': ['drupal', 'sites/all/modules', 'sites/default/files'],
+                    'sitecore': ['sitecore', '_scwebapp', 'sitecore-config'],
+                    'aem': ['aem-grid', '/etc/clientlibs', 'foundation-layout', '/content/dam/', 'adobe.target'],
+                    'umbraco': ['umbraco', 'umb_', 'umbraco-forms'],
+                    'kentico': ['kentico', '/cmssiteutils/', 'kentico.forms']
                 },
                 'personalization': {
-                    'optimizely': 'Optimizely',
-                    'adobe.target': 'Adobe Target',
-                    'tealium': 'Tealium',
-                    'dynamic yield': 'Dynamic Yield',
-                    'monetate': 'Monetate',
-                    'mbox.js': 'Adobe Target',
-                    'at.js': 'Adobe Target'
+                    'adobe target': ['mbox', 'target.js', 'adobe.target', 'at.js', 'mbox.js', 'target-global-mbox', 'tt.omtrdc.net'],
+                    'optimizely': ['optimizely', 'cdn.optimizely.com', 'optimizelyDataApi'],
+                    'tealium': ['tealium', 'utag.js', 'utag_data', 'tags.tiqcdn.com'],
+                    'dynamic yield': ['dy-', 'dynamicyield', 'cdn.dynamicyield.com'],
+                    'monetate': ['monetate', 'shopinterest', 'monetate.net']
                 },
                 'search': {
-                    'algolia': 'Algolia',
-                    'elasticsearch': 'Elasticsearch',
-                    'coveo': 'Coveo',
-                    'searchspring': 'SearchSpring',
-                    'klevu': 'Klevu',
-                    'instantsearch.js': 'Algolia'
+                    'algolia': ['algolia', 'algoliasearch', 'instantsearch.js', 'cdn.algolia.net'],
+                    'elasticsearch': ['elasticsearch', '_msearch', 'elastic.co'],
+                    'coveo': ['coveo', 'coveoua', 'static.cloud.coveo.com'],
+                    'searchspring': ['searchspring', 'ss-wrapper', 'searchspring.net'],
+                    'klevu': ['klevu', 'klevu-', 'js.klevu.com']
                 }
             }
             
-            for category, category_patterns in patterns.items():
-                for pattern, vendor in category_patterns.items():
-                    if pattern in src or pattern in script_content:
-                        technologies[category].add(vendor)
-                        print(f"Found {category.title()}: {vendor}")
+            for category, vendors in patterns.items():
+                for vendor, vendor_patterns in vendors.items():
+                    for pattern in vendor_patterns:
+                        if (pattern in src or 
+                            pattern in script_content or 
+                            pattern in data_attrs):
+                            vendor_name = ' '.join(word.capitalize() for word in vendor.split())
+                            technologies[category].add(vendor_name)
+                            print(f"Found {category} technology: {vendor_name} (matched pattern: {pattern})")
+                            break
                     
         except Exception as e:
             print(f"Error analyzing script tag: {str(e)}")
+            
+        # Check for common JavaScript libraries and frameworks
+        common_libs = {
+            'jquery': 'jQuery',
+            'react': 'React',
+            'angular': 'Angular',
+            'vue': 'Vue.js'
+        }
+        for lib, name in common_libs.items():
+            if lib in src.lower() or lib in script_content:
+                print(f"Found JavaScript library: {name}")
             
     def process_brands(self):
         print("Starting brand analysis...")
@@ -382,22 +402,40 @@ class MartechAnalyzer:
                 technologies['cms'].add(cms)
                 
     def _analyze_html_content(self, content: str, technologies: Dict[str, Set[str]]):
-        if 'wp-content' in content or 'wp-includes' in content:
-            technologies['cms'].add('WordPress')
-        if 'drupal.settings' in content:
-            technologies['cms'].add('Drupal')
-        if 'sitecore' in content:
-            technologies['cms'].add('Sitecore')
-            
-        if 'mboxCreate' in content or 'adobe.target' in content:
-            technologies['personalization'].add('Adobe Target')
-        if 'tealium' in content:
-            technologies['personalization'].add('Tealium')
-            
-        if 'instantsearch.js' in content:
-            technologies['search'].add('Algolia')
-        if 'coveo' in content:
-            technologies['search'].add('Coveo')
+        content_lower = content.lower()
+        patterns = {
+            'cms': {
+                'wordpress': ['wp-content', 'wp-includes', 'wp-json', 'wp-admin'],
+                'drupal': ['drupal.settings', 'drupal-', 'sites/all/modules'],
+                'sitecore': ['sitecore', '_scwebapp'],
+                'aem': ['aem-grid', '/etc/clientlibs', 'foundation-layout', '/content/dam/'],
+                'umbraco': ['umbraco', 'umb_'],
+                'kentico': ['kentico', '/cmssiteutils/']
+            },
+            'personalization': {
+                'adobe target': ['mboxcreate', 'adobe.target', 'at.js', 'mbox.js', 'target-global-mbox'],
+                'optimizely': ['optimizely', 'optimizelyDataApi'],
+                'tealium': ['tealium', 'utag.js', 'utag_data'],
+                'dynamic yield': ['dy-', 'dynamicyield'],
+                'monetate': ['monetate', 'shopinterest']
+            },
+            'search': {
+                'algolia': ['algolia', 'instantsearch.js', 'algoliasearch'],
+                'elasticsearch': ['elasticsearch', '_msearch'],
+                'coveo': ['coveo', 'coveoua'],
+                'searchspring': ['searchspring', 'ss-wrapper'],
+                'klevu': ['klevu', 'klevu-']
+            }
+        }
+        
+        for category, vendors in patterns.items():
+            for vendor, vendor_patterns in vendors.items():
+                for pattern in vendor_patterns:
+                    if pattern in content_lower:
+                        vendor_name = vendor.title()
+                        technologies[category].add(vendor_name)
+                        print(f"Found {category} technology: {vendor_name} (matched pattern: {pattern})")
+                        break
 
 if __name__ == "__main__":
     import os
