@@ -1,12 +1,13 @@
 import csv
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 from typing import List, Dict, Set
 from urllib.parse import urlparse
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from collections import defaultdict
+from requests.exceptions import Timeout, RequestException
 
 class MartechAnalyzer:
     def __init__(self, todo_file: str, output_csv: str):
@@ -122,29 +123,73 @@ class MartechAnalyzer:
             technologies['search'].add('Elasticsearch')
             
     def process_brands(self):
+        print("Starting brand analysis...")
         while True:
             brand = self.load_next_brand()
             if brand is None:
                 break
                 
+            print(f"\nAnalyzing brand: {brand}")
             domains = self.find_domains(brand)
+            print(f"Found {len(domains)} domains for {brand}")
+            
+            brand_tech_stack = {
+                'cms': defaultdict(float),
+                'personalization': defaultdict(float),
+                'search': defaultdict(float)
+            }
+            
             for domain in domains:
-                tech_stack = self.analyze_domain(domain)
-                self.results.append({
-                    'brand': brand,
-                    'domain': domain,
-                    'cms': ','.join(tech_stack['cms']),
-                    'personalization': ','.join(tech_stack['personalization']),
-                    'search': ','.join(tech_stack['search'])
-                })
+                try:
+                    print(f"Analyzing domain: {domain}")
+                    tech_stack = self.analyze_domain(domain)
+                    
+                    # Calculate weights for each category on this domain
+                    for category in tech_stack:
+                        if tech_stack[category]:
+                            weight = 1.0 / len(tech_stack[category])
+                            for tech in tech_stack[category]:
+                                brand_tech_stack[category][tech] += weight
+                    
+                    # Store raw results
+                    self.results.append({
+                        'brand': brand,
+                        'domain': domain,
+                        'cms': ','.join(tech_stack['cms']),
+                        'personalization': ','.join(tech_stack['personalization']),
+                        'search': ','.join(tech_stack['search'])
+                    })
+                except Exception as e:
+                    print(f"Error analyzing {domain}: {str(e)}")
+                    continue
+            
+            # Add weighted results for the brand
+            for category in ['cms', 'personalization', 'search']:
+                for tech, weight in brand_tech_stack[category].items():
+                    self.results.append({
+                        'brand': brand,
+                        'domain': '*BRAND_TOTAL*',
+                        'technology_type': category,
+                        'technology': tech,
+                        'weight': weight
+                    })
                 
         self._save_results()
     
     def _save_results(self):
-        with open(self.output_csv, 'w', newline='') as f:
+        # Save detailed domain results
+        domain_results = [r for r in self.results if 'cms' in r]
+        with open('martech_analysis/output/domain_results.csv', 'w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=['brand', 'domain', 'cms', 'personalization', 'search'])
             writer.writeheader()
-            writer.writerows(self.results)
+            writer.writerows(domain_results)
+            
+        # Save weighted brand results
+        brand_results = [r for r in self.results if 'technology_type' in r]
+        with open(self.output_csv, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=['brand', 'domain', 'technology_type', 'technology', 'weight'])
+            writer.writeheader()
+            writer.writerows(brand_results)
     
     def generate_charts(self):
         df = pd.read_csv(self.output_csv)
