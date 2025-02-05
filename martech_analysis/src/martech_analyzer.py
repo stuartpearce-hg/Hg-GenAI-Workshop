@@ -123,6 +123,29 @@ class MartechAnalyzer:
         
         try:
             print(f"\nAnalyzing HTML content for {domain}")
+            
+            # Check for Adobe Target and Experience Cloud domains
+            adobe_domains = [
+                f"{domain.split('.')[0]}.tt.omtrdc.net",
+                f"{domain.split('.')[0]}.sc.omtrdc.net",
+                f"{domain.split('.')[0]}.demdex.net"
+            ]
+            
+            for adobe_domain in adobe_domains:
+                try:
+                    adobe_response = requests.head(
+                        f"https://{adobe_domain}",
+                        timeout=5,
+                        headers=headers,
+                        verify=False
+                    )
+                    if adobe_response.status_code < 400:
+                        print(f"Found Adobe domain: {adobe_domain}")
+                        technologies['personalization'].add('Adobe Target')
+                        break
+                except:
+                    continue
+            
             response = requests.get(
                 f"https://{domain}",
                 timeout=10,
@@ -133,7 +156,21 @@ class MartechAnalyzer:
             
             html_content = response.text
             print(f"Retrieved {len(html_content)} bytes of HTML content")
+            
+            # Check for common technology indicators in raw HTML
+            html_lower = html_content.lower()
+            if any(x in html_lower for x in ['mbox.js', 'at.js', 'adobe.target', 'mboxdefine']):
+                technologies['personalization'].add('Adobe Target')
+            if any(x in html_lower for x in ['sitecore', '_scwebapp', 'sc_site']):
+                technologies['cms'].add('Sitecore')
+                
             soup = BeautifulSoup(html_content, 'html.parser')
+            
+            # Check for vendor-specific elements
+            if soup.find_all(class_=lambda x: x and ('sc_' in x or 'sitecore' in x)):
+                technologies['cms'].add('Sitecore')
+            if soup.find_all(class_=lambda x: x and ('mboxDefault' in x or 'target-' in x)):
+                technologies['personalization'].add('Adobe Target')
             
             # Meta tags analysis
             meta_tags = soup.find_all('meta')
@@ -358,17 +395,47 @@ class MartechAnalyzer:
         brand_df = df[df['domain'] == '*BRAND_TOTAL*']
         brand_df = brand_df[brand_df['technology_type'] == category.lower()]
         
-        # Group by technology and sum weights
+        # Group by technology and sum weights for brand-level analysis
         tech_weights = brand_df.groupby('technology')['weight'].sum().sort_values(ascending=False)
         
-        # Create domain count chart
+        # Create brand count chart
         plt.figure(figsize=(12, 6))
-        plt.bar(list(tech_weights.index), list(tech_weights.values))
-        plt.title(f'{category.title()} Distribution by Weighted Score')
+        sns.barplot(x=tech_weights.index, y=tech_weights.values, palette='viridis')
+        plt.title(f'{category.title()} Distribution by Brand Count (Weighted)')
         plt.xticks(rotation=45, ha='right')
-        plt.ylabel('Weighted Score')
+        plt.ylabel('Weighted Brand Count')
+        plt.grid(True, alpha=0.3)
         plt.tight_layout()
-        plt.savefig(f'martech_analysis/output/{category}_distribution.png')
+        plt.savefig(f'martech_analysis/output/{category}_brand_distribution.png', dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        # Calculate domain-level distribution
+        domain_df = df[df['domain'] != '*BRAND_TOTAL*']
+        domain_techs = defaultdict(int)
+        
+        for _, row in domain_df.iterrows():
+            if category.lower() == 'cms':
+                techs = row['cms'].split(', ')
+            elif category.lower() == 'personalization':
+                techs = row['personalization'].split(', ')
+            else:
+                techs = row['search'].split(', ')
+            
+            for tech in techs:
+                if tech:
+                    domain_techs[tech] += 1
+        
+        # Sort and create domain count chart
+        domain_counts = pd.Series(domain_techs).sort_values(ascending=False)
+        
+        plt.figure(figsize=(12, 6))
+        sns.barplot(x=domain_counts.index, y=domain_counts.values, palette='viridis')
+        plt.title(f'{category.title()} Distribution by Domain Count')
+        plt.xticks(rotation=45, ha='right')
+        plt.ylabel('Number of Domains')
+        plt.grid(True, alpha=0.3)
+        plt.tight_layout()
+        plt.savefig(f'martech_analysis/output/{category}_domain_distribution.png', dpi=300, bbox_inches='tight')
         plt.close()
 
     def _analyze_link_tag(self, tag, technologies: Dict[str, Set[str]]):
