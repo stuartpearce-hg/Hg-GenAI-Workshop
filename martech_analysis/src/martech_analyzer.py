@@ -2,7 +2,7 @@ import csv
 import requests
 import urllib3
 from bs4 import BeautifulSoup, Comment
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Optional
 from urllib.parse import urlparse
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -23,7 +23,7 @@ class MartechAnalyzer:
         import os
         os.makedirs(os.path.dirname(output_csv), exist_ok=True)
         
-    def load_next_brand(self) -> str:
+    def load_next_brand(self) -> Optional[str]:
         print("\nLoading next brand from todo file...")
         try:
             with open(self.todo_file, 'r') as f:
@@ -167,9 +167,9 @@ class MartechAnalyzer:
             soup = BeautifulSoup(html_content, 'html.parser')
             
             # Check for vendor-specific elements
-            if soup.find_all(class_=lambda x: x and ('sc_' in x or 'sitecore' in x)):
+            if soup.find_all(class_=lambda x: isinstance(x, str) and ('sc_' in x or 'sitecore' in x)):
                 technologies['cms'].add('Sitecore')
-            if soup.find_all(class_=lambda x: x and ('mboxDefault' in x or 'target-' in x)):
+            if soup.find_all(class_=lambda x: isinstance(x, str) and ('mboxDefault' in x or 'target-' in x)):
                 technologies['personalization'].add('Adobe Target')
             
             # Meta tags analysis
